@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jesse | NextGenTechnologist</title>
+    <meta
+      name="description"
+      content="Jesse, software engineer and cybersecurity graduate. An interactive portfolio built with React, TypeScript, and HTML5 Canvas, featuring playable mini games and useful developer tools."
+    />
+    <meta name="theme-color" content="#05070d" />
+    <meta property="og:title" content="Jesse | NextGenTechnologist" />
+    <meta
+      property="og:description"
+      content="Software engineer portfolio with playable HTML5 games, a working terminal, and real mini apps."
+    />
+    <meta property="og:type" content="website" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <noscript>
+      This portfolio is an interactive React app, so please enable JavaScript. Thanks!
+    </noscript>
+
+    <!--
+      Netlify Forms blueprint. Netlify scans static HTML at deploy time to register forms,
+      and React renders the real form at runtime, so this hidden copy lets Netlify detect it.
+      Field names must match src/sections/Contact.tsx.
+    -->
+    <form name="contact" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="text" name="name" />
+      <input type="email" name="email" />
+      <input type="text" name="subject" />
+      <textarea name="message"></textarea>
+      <input type="text" name="bot-field" />
+    </form>
+
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
