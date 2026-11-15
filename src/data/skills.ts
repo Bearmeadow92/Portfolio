@@ -2,7 +2,7 @@
  * @file Skills shown in the Skills section and the terminal `skills` command.
  *
  * Levels are honest self assessments. To add a skill, append to `skills`. The
- * category index and radar averages below update automatically.
+ * category index below updates automatically.
  */
 
 export type SkillCategory = "Frontend" | "Languages" | "Security" | "Tools";
@@ -48,9 +48,3 @@ export const skillsByCategory: ReadonlyMap<SkillCategory, readonly Skill[]> = ((
   for (const skill of skills) index.get(skill.category)!.push(skill);
   return index;
 })();
-
-/** Average level per category for the radar chart. Computed once, never during render. */
-export const categoryAverages: readonly { category: SkillCategory; average: number }[] = skillCategories.map((category) => {
-  const list = skillsByCategory.get(category)!;
-  return { category, average: list.reduce((sum, s) => sum + s.level, 0) / list.length };
-});

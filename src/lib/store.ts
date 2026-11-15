@@ -5,7 +5,7 @@ import { useSyncExternalStore } from "react";
 
 /**
  * A minimal observable store (think a tiny Zustand) for app-wide state that many
- * unrelated components need, such as the theme or the open window. No provider needed.
+ * unrelated components need, such as the scene or the open window. No provider needed.
  */
 export function createStore<T>(initial: T) {
   let state = initial;

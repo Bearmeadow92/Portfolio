@@ -2,7 +2,7 @@
  * @file Side effects for terminal commands and command palette actions.
  */
 import type { Action } from "./commands";
-import { applyTheme } from "../lib/theme";
+import { applyScene } from "../lib/scene";
 import { openItem } from "../lib/launcher";
 import { scrollToSection, setMatrix } from "../lib/effects";
 
@@ -12,8 +12,8 @@ export function performAction(action: Action) {
     case "navigate":
       scrollToSection(action.target);
       break;
-    case "theme":
-      applyTheme(action.value);
+    case "scene":
+      applyScene(action.value);
       break;
     case "open":
       openItem(action.id);

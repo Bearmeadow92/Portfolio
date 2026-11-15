@@ -1,5 +1,5 @@
 /**
- * @file "Source" section: this portfolio is its own featured project.
+ * @file Source: this portfolio is its own featured project.
  *
  * Shows the repository's live language breakdown and latest commits, pulled from the
  * GitHub REST API at runtime. If the API is unreachable or rate limited, the static
@@ -7,20 +7,19 @@
  */
 import { profile } from "../data/profile";
 import { useRepo } from "../hooks/useRepo";
+import { Button } from "../components/Button";
 import { Reveal } from "../components/Reveal";
 import { SectionHeading } from "../components/SectionHeading";
 
-/** GitHub's own colors for common languages. */
-const LANG_COLORS: Record<string, string> = {
-  TypeScript: "#3178c6", JavaScript: "#f1e05a", CSS: "#663399", HTML: "#e34c26", Python: "#3572A5", Rust: "#dea584",
-};
+/** Language bar segments use the scene palette (ranked by share), not per-language brand colors. */
+const SEGMENT_CLASSES = ["bg-text", "bg-accent", "bg-muted", "bg-border"];
 
 /** Engineering practices worth pointing out to someone skimming the repo. */
 const PRACTICES = [
-  { icon: "🧪", title: "Unit tested", body: "Pure game rules and utilities are covered by Vitest." },
-  { icon: "🤖", title: "CI on every push", body: "GitHub Actions runs the type check, tests, and build." },
-  { icon: "🔒", title: "Strict TypeScript", body: "Strict mode, plus unchecked index access turned on." },
-  { icon: "🪶", title: "Two dependencies", body: "React and React DOM. Everything else is hand built." },
+  { title: "Unit tested", body: "Game rules and utilities are pure functions covered by Vitest." },
+  { title: "CI on every push", body: "GitHub Actions runs the type check, the tests, and the build." },
+  { title: "Strict TypeScript", body: "Strict mode, with unchecked index access turned on." },
+  { title: "Two dependencies", body: "React and React DOM. Everything else, shaders included, is hand written." },
 ];
 
 /** Formats an ISO date as a short relative time, such as "3d ago". */
@@ -40,106 +39,94 @@ export function SourceSection() {
   const repoUrl = `${profile.links.github}/${profile.repo}`;
 
   return (
-    <section id="source" className="relative mx-auto max-w-6xl scroll-mt-20 px-4 py-28 sm:px-6">
-      <SectionHeading index="06" kicker="source" title="Read the code">
-        This whole site is open source. The stats below are pulled live from the GitHub API, so they are always current.
+    <section id="source" className="mx-auto max-w-[1400px] scroll-mt-20 px-5 py-28 sm:px-10">
+      <SectionHeading index="05" label="Source" title="Read the code.">
+        The whole site is open source. The numbers below come live from the GitHub API.
       </SectionHeading>
 
-      <div className="grid gap-6 lg:grid-cols-[1.1fr_1fr]">
-        {/* min-w-0 lets grid items shrink below their content width, so long commit titles truncate instead of widening the page. */}
+      {/* min-w-0 lets grid items shrink below their content width, so long commit titles truncate instead of widening the page. */}
+      <div className="grid gap-x-16 gap-y-14 md:pl-[11rem] lg:grid-cols-2">
         <Reveal className="min-w-0">
-          <div className="panel h-full p-6">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <h3 className="break-all font-mono text-xl font-bold text-accent">
-                  {profile.github}/{profile.repo}
-                </h3>
-                <p className="mt-1 text-muted">
-                  {data.status === "ready" && data.repo.description ? data.repo.description : "The source code for this portfolio."}
-                </p>
-              </div>
-              <a href={repoUrl} target="_blank" rel="noreferrer" className="btn btn-primary !py-2">
-                View source ↗
-              </a>
-            </div>
+          <a href={repoUrl} target="_blank" rel="noreferrer" className="link break-all font-display text-2xl font-bold sm:text-3xl">
+            {profile.github}/{profile.repo}
+          </a>
 
-            {/* Language bar, GitHub style. */}
-            <div className="mt-6" aria-busy={data.status === "loading"}>
-              <p className="mb-2 font-mono text-xs uppercase tracking-widest text-muted">Languages</p>
-              {data.status === "ready" && data.languages.length > 0 ? (
-                <>
-                  <div className="flex h-2.5 overflow-hidden rounded-full bg-border" role="img" aria-label={data.languages.map((l) => `${l.name} ${l.percent.toFixed(1)}%`).join(", ")}>
-                    {data.languages.map((l) => (
-                      <div key={l.name} style={{ width: `${l.percent}%`, background: LANG_COLORS[l.name] ?? "var(--muted)" }} />
-                    ))}
-                  </div>
-                  <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-1 font-mono text-xs text-muted">
-                    {data.languages.map((l) => (
-                      <li key={l.name} className="flex items-center gap-1.5">
-                        <span className="h-2.5 w-2.5 rounded-full" style={{ background: LANG_COLORS[l.name] ?? "var(--muted)" }} />
-                        {l.name} <span className="text-text">{l.percent.toFixed(1)}%</span>
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              ) : (
-                <div className={`h-2.5 rounded-full bg-border ${data.status === "loading" ? "animate-pulse" : ""}`} />
-              )}
-            </div>
+          <div className="mt-8" aria-busy={data.status === "loading"}>
+            <p className="label mb-3 opacity-70">Languages</p>
+            {data.status === "ready" && data.languages.length > 0 ? (
+              <>
+                <div className="flex h-2 gap-px" role="img" aria-label={data.languages.map((l) => `${l.name} ${l.percent.toFixed(1)}%`).join(", ")}>
+                  {data.languages.map((l, i) => (
+                    <div key={l.name} className={SEGMENT_CLASSES[Math.min(i, SEGMENT_CLASSES.length - 1)]} style={{ width: `${l.percent}%` }} />
+                  ))}
+                </div>
+                <ul className="mt-3 flex flex-wrap gap-x-6 gap-y-1 font-mono text-sm text-muted">
+                  {data.languages.map((l, i) => (
+                    <li key={l.name} className="flex items-center gap-2">
+                      <span className={`h-2 w-2 ${SEGMENT_CLASSES[Math.min(i, SEGMENT_CLASSES.length - 1)]}`} />
+                      {l.name} <span className="text-text">{l.percent.toFixed(1)}%</span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <div className={`h-2 bg-border ${data.status === "loading" ? "animate-pulse" : ""}`} />
+            )}
+          </div>
 
-            <ul className="mt-6 grid gap-3 sm:grid-cols-2">
-              {PRACTICES.map((item) => (
-                <li key={item.title} className="flex gap-3 rounded-xl border border-border bg-bg/40 p-3">
-                  <span className="text-xl" aria-hidden>{item.icon}</span>
-                  <div>
-                    <p className="text-sm font-semibold">{item.title}</p>
-                    <p className="text-sm text-muted">{item.body}</p>
-                  </div>
+          <ul className="mt-10 border-b border-border">
+            {PRACTICES.map((item) => (
+              <li key={item.title} className="grid gap-x-6 border-t border-border py-3.5 sm:grid-cols-[11rem_1fr]">
+                <span className="font-medium">{item.title}</span>
+                <span className="text-muted">{item.body}</span>
+              </li>
+            ))}
+          </ul>
+
+          <Button href={repoUrl} target="_blank" rel="noreferrer" className="mt-8">
+            View on GitHub <span aria-hidden>↗</span>
+          </Button>
+        </Reveal>
+
+        <Reveal delay={100} className="min-w-0">
+          <div className="mb-3 flex items-baseline justify-between">
+            <p className="label opacity-70">Latest commits</p>
+            {data.status === "ready" && <p className="label opacity-60">Pushed {timeAgo(data.repo.pushed_at)}</p>}
+          </div>
+
+          {data.status === "loading" && (
+            <ul aria-busy="true" aria-label="Loading commits">
+              {Array.from({ length: 5 }, (_, i) => (
+                <li key={i} className="border-t border-border py-4">
+                  <div className="h-4 animate-pulse bg-border" style={{ width: `${85 - i * 9}%` }} />
                 </li>
               ))}
             </ul>
-          </div>
-        </Reveal>
+          )}
 
-        <Reveal delay={120} className="min-w-0">
-          <div className="panel h-full p-6">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="font-mono text-sm uppercase tracking-widest text-accent">Latest commits</h3>
-              {data.status === "ready" && <span className="font-mono text-xs text-muted">pushed {timeAgo(data.repo.pushed_at)}</span>}
-            </div>
+          {data.status === "error" && (
+            <p className="border-t border-border py-4 text-warn" role="alert">
+              {data.message} The full history is always on{" "}
+              <a href={`${repoUrl}/commits`} target="_blank" rel="noreferrer" className="underline">
+                GitHub
+              </a>
+              .
+            </p>
+          )}
 
-            {data.status === "loading" && (
-              <ul className="space-y-3" aria-busy="true" aria-label="Loading commits">
-                {Array.from({ length: 4 }, (_, i) => (
-                  <li key={i} className="h-10 animate-pulse rounded-lg bg-border/60" />
-                ))}
-              </ul>
-            )}
-
-            {data.status === "error" && (
-              <p className="text-sm text-warn" role="alert">
-                ⚠ {data.message} The full history is always available on{" "}
-                <a href={`${repoUrl}/commits`} target="_blank" rel="noreferrer" className="underline">
-                  GitHub
-                </a>
-                .
-              </p>
-            )}
-
-            {data.status === "ready" && (
-              <ol className="space-y-1">
-                {data.commits.map((c) => (
-                  <li key={c.sha}>
-                    <a href={c.url} target="_blank" rel="noreferrer" className="group flex items-baseline gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-accent/10">
-                      <code className="shrink-0 font-mono text-xs text-accent-2">{c.sha.slice(0, 7)}</code>
-                      <span className="min-w-0 flex-1 truncate text-sm group-hover:text-accent">{c.title}</span>
-                      <span className="shrink-0 font-mono text-xs text-muted">{timeAgo(c.date)}</span>
-                    </a>
-                  </li>
-                ))}
-              </ol>
-            )}
-          </div>
+          {data.status === "ready" && (
+            <ol className="border-b border-border">
+              {data.commits.map((commit) => (
+                <li key={commit.sha}>
+                  <a href={commit.url} target="_blank" rel="noreferrer" className="row grid grid-cols-[4.5rem_1fr_auto] items-baseline gap-x-4 px-2 py-4">
+                    <code className="font-mono text-sm opacity-70">{commit.sha.slice(0, 7)}</code>
+                    <span className="min-w-0 truncate">{commit.title}</span>
+                    <span className="label opacity-70">{timeAgo(commit.date)}</span>
+                  </a>
+                </li>
+              ))}
+            </ol>
+          )}
         </Reveal>
       </div>
     </section>

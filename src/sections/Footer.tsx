@@ -2,17 +2,18 @@
  * @file Page footer.
  */
 import { profile } from "../data/profile";
+import { sceneName, useScene } from "../lib/scene";
 
 export function Footer() {
+  const scene = useScene();
   return (
-    <footer className="border-t border-border py-10">
-      <div className="mx-auto flex max-w-6xl flex-col items-center gap-3 px-4 text-center text-sm text-muted sm:flex-row sm:justify-between sm:px-6 sm:text-left">
+    <footer className="border-t border-border">
+      <div className="label mx-auto flex max-w-[1400px] flex-col gap-3 px-5 py-8 opacity-70 sm:flex-row sm:items-center sm:justify-between sm:px-10">
         <p>
-          © {new Date().getFullYear()} {profile.name} · {profile.brand}. Built from scratch with React, TypeScript, Tailwind, and HTML5.
+          © {new Date().getFullYear()} {profile.name} / {profile.brand}
         </p>
-        <p className="font-mono text-xs">
-          <span title="↑ ↑ ↓ ↓ ← → ← → B A">psst, try the Konami code</span>
-        </p>
+        <p>Hand built with React, TypeScript, and WebGL</p>
+        <p title="Up, up, down, down, left, right, left, right, B, A">Now showing: {sceneName(scene)}</p>
       </div>
     </footer>
   );

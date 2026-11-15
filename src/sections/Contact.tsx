@@ -3,6 +3,8 @@
  */
 import { useState } from "react";
 import { profile } from "../data/profile";
+import { Button } from "../components/Button";
+import { pulse } from "../art/Backdrop";
 import { Reveal } from "../components/Reveal";
 import { SectionHeading } from "../components/SectionHeading";
 import { sfx } from "../lib/sound";
@@ -62,6 +64,7 @@ export function Contact() {
       setStatus("sent");
       setFields(EMPTY);
       sfx.win();
+      pulse(1.5);
     } catch {
       setStatus("error");
     }
@@ -70,13 +73,13 @@ export function Contact() {
   /** Renders a labeled text input wired up with validation and ARIA error messaging. */
   const field = (key: keyof Fields, label: string, props: React.InputHTMLAttributes<HTMLInputElement> = {}) => (
     <div>
-      <label htmlFor={`c-${key}`} className="mb-1 block text-sm text-muted">{label}</label>
+      <label htmlFor={`c-${key}`} className="label mb-2 block opacity-70">{label}</label>
       <input
         id={`c-${key}`}
         name={key}
         value={fields[key]}
         onChange={update(key)}
-        className={`input font-sans ${errors[key] ? "border-bad" : ""}`}
+        className={`input ${errors[key] ? "!border-bad" : ""}`}
         aria-invalid={!!errors[key]}
         aria-describedby={errors[key] ? `c-${key}-err` : undefined}
         {...props}
@@ -86,57 +89,48 @@ export function Contact() {
   );
 
   return (
-    <section id="contact" className="relative mx-auto max-w-6xl scroll-mt-20 px-4 py-28 sm:px-6">
-      <SectionHeading index="07" kicker="contact" title="Let's build something together">
-        Hiring, collaborating, or just want to talk shop about React, security, or the veteran to tech journey? My inbox is open.
+    <section id="contact" className="mx-auto max-w-[1400px] scroll-mt-20 px-5 py-28 sm:px-10">
+      <SectionHeading index="06" label="Contact" title="Let's talk.">
+        Hiring, collaborating, or curious how something here works? Write to me. I usually reply within a day or two.
       </SectionHeading>
 
-      <div className="grid gap-8 lg:grid-cols-[1fr_1.4fr]">
+      <div className="grid gap-x-16 gap-y-12 md:pl-[11rem] lg:grid-cols-[1fr_1.4fr]">
         <Reveal>
-          <div className="space-y-3">
-            <a href={profile.links.github} target="_blank" rel="noreferrer" className="panel panel-hover flex items-center gap-4 p-5">
-              <span className="text-2xl" aria-hidden>🐙</span>
-              <div>
-                <p className="font-semibold">GitHub</p>
-                <p className="font-mono text-sm text-muted">@{profile.github}</p>
-              </div>
-            </a>
-            <a href={profile.links.linkedin} target="_blank" rel="noreferrer" className="panel panel-hover flex items-center gap-4 p-5">
-              <span className="text-2xl" aria-hidden>💼</span>
-              <div>
-                <p className="font-semibold">LinkedIn</p>
-                <p className="text-sm text-muted">Let's connect</p>
-              </div>
-            </a>
-            {profile.links.email && (
-              <a href={`mailto:${profile.links.email}`} className="panel panel-hover flex items-center gap-4 p-5">
-                <span className="text-2xl" aria-hidden>✉️</span>
-                <div>
-                  <p className="font-semibold">Email</p>
-                  <p className="text-sm text-muted">{profile.links.email}</p>
-                </div>
+          <ul className="border-b border-border">
+            <li>
+              <a href={profile.links.github} target="_blank" rel="noreferrer" className="row flex items-baseline justify-between gap-4 px-2 py-5">
+                <span className="font-display text-2xl font-bold">GitHub</span>
+                <span className="label opacity-70">@{profile.github} ↗</span>
               </a>
+            </li>
+            <li>
+              <a href={profile.links.linkedin} target="_blank" rel="noreferrer" className="row flex items-baseline justify-between gap-4 px-2 py-5">
+                <span className="font-display text-2xl font-bold">LinkedIn</span>
+                <span className="label opacity-70">Connect ↗</span>
+              </a>
+            </li>
+            {profile.links.email && (
+              <li>
+                <a href={`mailto:${profile.links.email}`} className="row flex items-baseline justify-between gap-4 px-2 py-5">
+                  <span className="font-display text-2xl font-bold">Email</span>
+                  <span className="label opacity-70">{profile.links.email}</span>
+                </a>
+              </li>
             )}
-            <div className="panel p-5 font-mono text-sm text-muted">
-              <span className="text-accent">$</span> response_time <span className="text-good">--fast</span>
-              <br />
-              <span className="text-muted/70"># Usually within a day or two.</span>
-            </div>
-          </div>
+          </ul>
         </Reveal>
 
-        <Reveal delay={120}>
+        <Reveal delay={100}>
           {status === "sent" ? (
-            <div className="panel grid h-full place-items-center p-10 text-center" role="status">
-              <div>
-                <p className="text-5xl">📡</p>
-                <p className="mt-4 text-2xl font-bold text-gradient">Transmission received!</p>
-                <p className="mt-2 text-muted">Thanks for reaching out. I'll get back to you soon.</p>
-                <button className="btn btn-ghost mt-6" onClick={() => setStatus("idle")}>Send another</button>
-              </div>
+            <div className="panel p-8 sm:p-12" role="status">
+              <p className="display text-4xl sm:text-5xl">Message sent.</p>
+              <p className="mt-4 text-muted">Thank you for reaching out. I will get back to you soon.</p>
+              <Button className="mt-8" onClick={() => setStatus("idle")}>
+                Send another
+              </Button>
             </div>
           ) : (
-            <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" onSubmit={submit} noValidate className="panel space-y-4 p-6">
+            <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" onSubmit={submit} noValidate className="panel space-y-5 p-6 sm:p-8">
               <input type="hidden" name="form-name" value="contact" />
               {/* Honeypot: hidden from humans, irresistible to bots. */}
               <p className="hidden">
@@ -144,13 +138,13 @@ export function Contact() {
                   Leave this empty <input name="bot-field" value={botField} onChange={(e) => setBotField(e.target.value)} tabIndex={-1} autoComplete="off" />
                 </label>
               </p>
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-5 sm:grid-cols-2">
                 {field("name", "Name", { autoComplete: "name", placeholder: "Ada Lovelace" })}
                 {field("email", "Email", { type: "email", autoComplete: "email", placeholder: "ada@company.com" })}
               </div>
-              {field("subject", "Subject (optional)", { placeholder: "Software Engineer role" })}
+              {field("subject", "Subject (optional)", { placeholder: "Software engineer role" })}
               <div>
-                <label htmlFor="c-message" className="mb-1 block text-sm text-muted">Message</label>
+                <label htmlFor="c-message" className="label mb-2 block opacity-70">Message</label>
                 <textarea
                   id="c-message"
                   name="message"
@@ -158,21 +152,21 @@ export function Contact() {
                   onChange={update("message")}
                   rows={5}
                   maxLength={2000}
-                  className={`input resize-y font-sans ${errors.message ? "border-bad" : ""}`}
+                  className={`input resize-y ${errors.message ? "!border-bad" : ""}`}
                   aria-invalid={!!errors.message}
                   aria-describedby={errors.message ? "c-message-err" : undefined}
-                  placeholder="Tell me about your team and what you're building."
+                  placeholder="Tell me about your team and what you are building."
                 />
                 {errors.message && <p id="c-message-err" className="mt-1 text-sm text-bad">{errors.message}</p>}
               </div>
               {status === "error" && (
                 <p className="text-sm text-bad" role="alert">
-                  Hmm, the message did not go through. Please try again, or reach me on LinkedIn.
+                  The message did not go through. Please try again, or reach me on LinkedIn.
                 </p>
               )}
-              <button type="submit" className="btn btn-primary w-full" disabled={status === "sending"}>
-                {status === "sending" ? "Transmitting..." : "Send message ↗"}
-              </button>
+              <Button type="submit" variant="primary" className="w-full" disabled={status === "sending"}>
+                {status === "sending" ? "Sending" : "Send message"} <span aria-hidden>→</span>
+              </Button>
             </form>
           )}
         </Reveal>

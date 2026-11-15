@@ -112,7 +112,7 @@ export default function KanbanBoard() {
                       e.dataTransfer.setData("text/plain", t.id);
                       e.dataTransfer.effectAllowed = "move";
                     }}
-                    className="group cursor-grab rounded-lg border border-border bg-bg p-2 text-sm active:cursor-grabbing"
+                    className="group cursor-grab border border-border bg-bg p-2 text-sm active:cursor-grabbing"
                   >
                     <p className={t.column === "done" ? "text-muted line-through" : ""}>{t.text}</p>
                     <div className="mt-2 flex items-center gap-1">
@@ -126,7 +126,7 @@ export default function KanbanBoard() {
                     </div>
                   </li>
                 ))}
-                {items.length === 0 && <li className="rounded-lg border border-dashed border-border p-3 text-center text-xs text-muted">Drop tasks here</li>}
+                {items.length === 0 && <li className=" border border-dashed border-border p-3 text-center text-xs text-muted">Drop tasks here</li>}
               </ul>
             </section>
           );

@@ -133,7 +133,7 @@ export default function CipherMemory() {
       locked.current = false;
       if (cfg.scrambleEvery && misses % cfg.scrambleEvery === 0) {
         const { cards, moved } = scramble(pending.cards, pending.matched);
-        setRound({ ...pending, cards, moved, flipped: [], message: "⚠ Scramble! Two cards just traded places." });
+        setRound({ ...pending, cards, moved, flipped: [], message: "Scramble! Two cards just traded places." });
         sfx.zap();
       } else {
         setRound({ ...pending, flipped: [] });
@@ -173,7 +173,7 @@ export default function CipherMemory() {
           <span>Time <b className="text-text">{time}</b></span>
           <span>Best <b className="text-accent">{best ?? "--"}</b></span>
           <button onClick={peek} disabled={round.peeksLeft === 0 || peeking || won} className="chip hover:border-accent-2 hover:text-accent-2 disabled:opacity-40" title={`Reveal every card briefly (costs ${PEEK_COST} moves)`}>
-            👁 Peek ×{round.peeksLeft}
+            Peek ×{round.peeksLeft}
           </button>
         </div>
       </div>
@@ -189,14 +189,14 @@ export default function CipherMemory() {
               onClick={() => flip(card)}
               disabled={isMatched}
               aria-label={isUp ? card.name : `Hidden card ${i + 1}`}
-              className={`aspect-square rounded-xl [perspective:800px] ${justMoved ? "ring-2 ring-warn" : ""}`}
+              className={`aspect-square [perspective:800px] ${justMoved ? "ring-2 ring-warn" : ""}`}
             >
               <div className={`relative h-full w-full transition-transform duration-500 [transform-style:preserve-3d] ${isUp ? "[transform:rotateY(180deg)]" : ""}`}>
-                <div className="absolute inset-0 grid place-items-center rounded-xl border border-border bg-surface-2 [backface-visibility:hidden] hover:border-accent">
+                <div className="absolute inset-0 grid place-items-center border border-border bg-surface-2 [backface-visibility:hidden] hover:border-accent">
                   <span className="font-mono text-xl text-muted/60">?</span>
                 </div>
                 <div
-                  className={`absolute inset-0 grid place-items-center rounded-xl border [backface-visibility:hidden] [transform:rotateY(180deg)] ${
+                  className={`absolute inset-0 grid place-items-center border [backface-visibility:hidden] [transform:rotateY(180deg)] ${
                     isMatched ? "border-good bg-good/10 text-good" : "border-accent bg-accent/10 text-accent"
                   }`}
                 >
@@ -219,7 +219,7 @@ export default function CipherMemory() {
             {"★".repeat(stars)}
             <span className="text-border">{"★".repeat(3 - stars)}</span>
           </p>
-          <p className="mt-1 font-mono text-xl font-bold text-gradient">{record ? "NEW RECORD! " : ""}Cipher cracked!</p>
+          <p className="mt-1 font-mono text-xl font-bold text-accent">{record ? "NEW RECORD! " : ""}Cipher cracked!</p>
           <p className="mt-1 text-muted">
             {round.moves} moves in {time}, with a best streak of {round.bestStreak}. Memory like a well kept log file.
           </p>

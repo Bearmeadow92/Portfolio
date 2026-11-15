@@ -12,7 +12,8 @@ export interface CatalogItem {
   id: string;
   kind: ItemKind;
   title: string;
-  icon: string;
+  /** Short category shown beside the title in the work index. */
+  tag: string;
   blurb: string;
   tech: string[];
   highlights: string[];
@@ -23,7 +24,7 @@ export const catalog: readonly CatalogItem[] = [
     id: "firewall",
     kind: "game",
     title: "Firewall Defender",
-    icon: "🛡️",
+    tag: "Arcade",
     blurb: "Defend your server core through waves of threats. Earn upgrades, unmask trojans, and survive the boss.",
     tech: ["Canvas 2D", "Wave system", "Upgrades"],
     highlights: ["Simulation runs outside React renders", "O(1) entity removal", "Pooled particles, zero GC"],
@@ -32,7 +33,7 @@ export const catalog: readonly CatalogItem[] = [
     id: "bytebreaker",
     kind: "game",
     title: "Byte Breaker",
-    icon: "🧱",
+    tag: "Arcade",
     blurb: "Squash bugs across eight levels with lasers, fireballs, and explosive chain reactions.",
     tech: ["Canvas 2D", "Grid collision", "Physics"],
     highlights: ["O(1) grid collision lookup", "Anti-tunneling sub-steps", "Cached offscreen brick layer"],
@@ -41,7 +42,7 @@ export const catalog: readonly CatalogItem[] = [
     id: "memory",
     kind: "game",
     title: "Cipher Memory",
-    icon: "🧠",
+    tag: "Arcade",
     blurb: "Match programming symbols across three tiers. In Staff mode, the cards scramble on you.",
     tech: ["React state", "CSS 3D transforms", "a11y"],
     highlights: ["Fisher-Yates shuffle", "Fully keyboard accessible", "Pure, unit tested rules"],
@@ -50,7 +51,7 @@ export const catalog: readonly CatalogItem[] = [
     id: "password",
     kind: "app",
     title: "Password Lab",
-    icon: "🔐",
+    tag: "Security",
     blurb: "Analyze password entropy and estimated crack time, then generate a truly random one.",
     tech: ["Web Crypto", "Entropy math", "useMemo"],
     highlights: ["Unbiased rejection sampling", "Detects common patterns", "Nothing leaves your browser"],
@@ -59,7 +60,7 @@ export const catalog: readonly CatalogItem[] = [
     id: "crypto",
     kind: "app",
     title: "Crypto Kit",
-    icon: "🧪",
+    tag: "Security",
     blurb: "Hash text with SHA-1 through SHA-512 and encode or decode Base64, hex, binary, URL, and ROT13.",
     tech: ["SubtleCrypto", "TextEncoder", "Async effects"],
     highlights: ["UTF-8 safe encoding", "Stale async results ignored", "Clipboard API"],
@@ -68,7 +69,7 @@ export const catalog: readonly CatalogItem[] = [
     id: "subnet",
     kind: "app",
     title: "Subnet Calculator",
-    icon: "🌐",
+    tag: "Networking",
     blurb: "Network, broadcast, host range, and a live binary view for any IPv4 CIDR block.",
     tech: ["Bitwise ops", "Unit tested", "Network+"],
     highlights: ["O(1) 32-bit math", "RFC 1918 and RFC 3021 aware", "Binary visualizer"],
@@ -77,7 +78,7 @@ export const catalog: readonly CatalogItem[] = [
     id: "kanban",
     kind: "app",
     title: "Mission Board",
-    icon: "📋",
+    tag: "Productivity",
     blurb: "A drag and drop Kanban board that saves to your browser. Plan the work, ship the work.",
     tech: ["HTML5 Drag & Drop", "localStorage", "Custom hooks"],
     highlights: ["Keyboard fallback controls", "Persists between visits", "Priority tags"],

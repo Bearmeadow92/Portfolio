@@ -20,7 +20,7 @@ const TONE_CLASS: Record<Tone, string> = {
 
 const WELCOME: Line[] = [
   { text: "NextGenOS ngt-sh 1.0  (type 'help' to get started)", tone: "accent" },
-  { text: "Try: whoami · skills security · play firewall · theme matrix · sudo hire-jesse", tone: "muted" },
+  { text: "Try: whoami · skills security · play firewall · scene halftone · sudo hire-jesse", tone: "muted" },
 ];
 
 /** One block of scrollback: an optional echoed prompt plus its output lines. */
@@ -95,21 +95,19 @@ export function Terminal() {
   };
 
   return (
-    <div className="panel overflow-hidden shadow-2xl shadow-accent/10" onClick={() => inputRef.current?.focus()}>
-      <div className="flex items-center gap-2 border-b border-border bg-surface-2/80 px-4 py-2.5">
-        <span className="h-3 w-3 rounded-full bg-bad/80" />
-        <span className="h-3 w-3 rounded-full bg-warn/80" />
-        <span className="h-3 w-3 rounded-full bg-good/80" />
-        <span className="ml-2 font-mono text-xs text-muted">jesse@nextgen: ~</span>
+    <div className="panel" onClick={() => inputRef.current?.focus()}>
+      <div className="label flex items-center justify-between border-b border-border px-4 py-2.5 opacity-70">
+        <span>jesse@nextgen: ~</span>
+        <span>ngt-sh</span>
       </div>
-      <div ref={scrollRef} className="h-[380px] overflow-y-auto p-4 font-mono text-[13px] leading-relaxed" role="log" aria-live="polite">
+      <div ref={scrollRef} className="h-[400px] overflow-y-auto p-4 font-mono text-sm leading-relaxed" role="log" aria-live="polite">
         {entries.map((entry) => (
           <div key={entry.id} className="mb-2">
             {entry.prompt !== undefined && (
               <div>
-                <span className="text-good">jesse@nextgen</span>
+                <span className="text-accent">jesse@nextgen</span>
                 <span className="text-muted">:</span>
-                <span className="text-accent">~</span>
+                <span>~</span>
                 <span className="text-muted">$ </span>
                 {entry.prompt}
               </div>
@@ -123,9 +121,9 @@ export function Terminal() {
         ))}
         <form onSubmit={submit} className="flex items-center">
           <label htmlFor="term-input" className="shrink-0">
-            <span className="text-good">jesse@nextgen</span>
+            <span className="text-accent">jesse@nextgen</span>
             <span className="text-muted">:</span>
-            <span className="text-accent">~</span>
+            <span>~</span>
             <span className="text-muted">$&nbsp;</span>
           </label>
           <input

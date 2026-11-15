@@ -503,7 +503,7 @@ export default function ByteBreaker() {
     }
     const ctx = brickLayer.current.ctx;
     ctx.clearRect(0, 0, W, H);
-    ctx.font = "bold 10px 'JetBrains Mono', monospace";
+    ctx.font = "bold 10px 'DM Mono', monospace";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
 
@@ -553,7 +553,7 @@ export default function ByteBreaker() {
     ctx.textBaseline = "middle";
 
     // Power ups.
-    ctx.font = "bold 12px 'JetBrains Mono', monospace";
+    ctx.font = "bold 12px 'DM Mono', monospace";
     ctx.lineWidth = 2;
     ctx.strokeStyle = p.accent2;
     for (const pw of w.powers) {
@@ -611,7 +611,7 @@ export default function ByteBreaker() {
 
     /* HUD, drawn without screen shake. */
     ctx.textBaseline = "alphabetic";
-    ctx.font = "bold 16px 'JetBrains Mono', monospace";
+    ctx.font = "bold 16px 'DM Mono', monospace";
     ctx.textAlign = "left";
     ctx.fillStyle = p.text;
     ctx.fillText(`SCORE ${w.score.toLocaleString()}`, 16, 30);
@@ -619,7 +619,7 @@ export default function ByteBreaker() {
     ctx.fillStyle = p.bad;
     ctx.fillText("♥".repeat(w.lives), W - 16, 30);
     ctx.textAlign = "center";
-    ctx.font = "12px 'JetBrains Mono', monospace";
+    ctx.font = "12px 'DM Mono', monospace";
     ctx.fillStyle = p.muted;
     const chain = chainMultiplier(w.chain);
     ctx.fillText(`SPRINT ${w.level} · ${levelName(w.level).toUpperCase()}${chain > 1 ? ` · CHAIN x${chain}` : ""}`, W / 2, 28);
@@ -644,7 +644,7 @@ export default function ByteBreaker() {
     if (w.banner > 0) {
       ctx.globalAlpha = Math.min(w.banner, 1);
       ctx.textAlign = "center";
-      ctx.font = "bold 30px 'JetBrains Mono', monospace";
+      ctx.font = "bold 30px 'DM Mono', monospace";
       ctx.fillStyle = p.accent;
       ctx.fillText(`SPRINT ${w.level}: ${levelName(w.level).toUpperCase()}`, W / 2, H / 2 + 70);
       ctx.globalAlpha = 1;
@@ -659,7 +659,7 @@ export default function ByteBreaker() {
   /* ---------------------------------- Markup -------------------------------- */
 
   return (
-    <div className="relative mx-auto w-full max-w-[800px] overflow-hidden rounded-xl border border-border">
+    <div className="relative mx-auto w-full max-w-[800px] overflow-hidden border border-border">
       <canvas
         ref={canvasRef}
         onPointerMove={onPointerMove}
@@ -669,7 +669,7 @@ export default function ByteBreaker() {
       />
       <GameOverlay
         phase={phase}
-        title="BYTE BREAKER"
+        title="Byte Breaker"
         tagline="Production is on fire. Squash every bug before the sprint ends."
         controls={[
           "Mouse, touch, or ← → / A D to move",

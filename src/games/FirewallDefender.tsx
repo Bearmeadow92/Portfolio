@@ -486,7 +486,7 @@ export default function FirewallDefender() {
     const p = paletteRef.current;
     if (!ctx || !p) return;
     const w = world.current;
-    const mono = (size: number, bold = true) => `${bold ? "bold " : ""}${size}px 'JetBrains Mono', monospace`;
+    const mono = (size: number, bold = true) => `${bold ? "bold " : ""}${size}px 'DM Mono', monospace`;
 
     ctx.save();
     if (w.shake > 0) ctx.translate((Math.random() - 0.5) * w.shake, (Math.random() - 0.5) * w.shake);
@@ -618,7 +618,8 @@ export default function FirewallDefender() {
 
     // Owned upgrades, bottom left.
     let ux = 16;
-    ctx.font = "14px sans-serif";
+    ctx.font = "15px sans-serif";
+    ctx.fillStyle = p.text;
     for (const id of Object.keys(w.loadout) as UpgradeId[]) {
       const level = w.loadout[id];
       if (!level || id === "repair") continue;
@@ -626,7 +627,8 @@ export default function FirewallDefender() {
       ctx.font = mono(10);
       ctx.fillStyle = p.muted;
       ctx.fillText(String(level), ux + 18, H - 14);
-      ctx.font = "14px sans-serif";
+      ctx.font = "15px sans-serif";
+      ctx.fillStyle = p.text;
       ux += 36;
     }
 
@@ -657,14 +659,14 @@ export default function FirewallDefender() {
     ctx.globalAlpha = 1;
     ctx.textAlign = "center";
     ctx.fillStyle = ready ? p.text : p.muted;
-    ctx.fillText(ready ? "⚡ EMP READY [SPACE]" : `EMP ${Math.floor(w.emp)}%`, CX, H - 20);
+    ctx.fillText(ready ? "EMP READY [SPACE]" : `EMP ${Math.floor(w.emp)}%`, CX, H - 20);
 
     // Wave banner.
     if (w.banner > 0) {
       ctx.globalAlpha = Math.min(w.banner, 1);
       ctx.font = mono(34);
       ctx.fillStyle = w.cfg.boss ? p.warn : p.accent;
-      ctx.fillText(w.cfg.boss ? `⚠ BOSS WAVE ${w.cfg.wave}` : `WAVE ${w.cfg.wave}`, CX, 120);
+      ctx.fillText(w.cfg.boss ? `BOSS WAVE ${w.cfg.wave}` : `WAVE ${w.cfg.wave}`, CX, 120);
       ctx.globalAlpha = 1;
     }
   };
@@ -680,7 +682,7 @@ export default function FirewallDefender() {
 
   const w = world.current;
   return (
-    <div className="relative mx-auto w-full max-w-[800px] overflow-hidden rounded-xl border border-border">
+    <div className="relative mx-auto w-full max-w-[800px] overflow-hidden border border-border">
       <canvas
         ref={canvasRef}
         onPointerDown={onPointerDown}
@@ -689,7 +691,7 @@ export default function FirewallDefender() {
       />
 
       {phase === "intermission" && (
-        <div className="absolute inset-0 grid place-items-center overflow-y-auto bg-bg/80 p-3 backdrop-blur-sm">
+        <div className="absolute inset-0 grid place-items-center overflow-y-auto bg-bg/90 p-3">
           <div className="w-full max-w-xl text-center">
             <h3 className="font-mono text-xl font-bold text-good sm:text-2xl">WAVE {w.cfg.wave} CLEARED</h3>
             <p className="mt-1 text-sm text-muted">Choose an upgrade (or press 1 to {choices.length})</p>
@@ -704,7 +706,7 @@ export default function FirewallDefender() {
                     autoFocus={i === 0}
                     className="panel panel-hover flex items-center gap-3 p-3 text-left sm:block sm:text-center"
                   >
-                    <span className="text-2xl sm:text-3xl" aria-hidden>{def.icon}</span>
+                    <span className="text-2xl text-accent sm:text-3xl" aria-hidden>{def.icon}</span>
                     <span className="block">
                       <span className="block font-mono text-sm font-bold text-accent">{def.name}</span>
                       {def.max !== Infinity && <span className="block font-mono text-[11px] text-muted">Level {next} of {def.max}</span>}
@@ -720,12 +722,12 @@ export default function FirewallDefender() {
 
       <GameOverlay
         phase={phase}
-        title="FIREWALL DEFENDER"
+        title="Firewall Defender"
         tagline="Hostile packets are inbound. Protect the core."
         controls={[
           "Click or tap RED threats. Let GREEN traffic through",
           "Trojans look green but flicker red. Stay sharp",
-          "Grab PURPLE patches and pick an upgrade each wave",
+          "Grab BLUE patches and pick an upgrade each wave",
           "SPACE fires the EMP. P pauses. ESC exits",
         ]}
         score={result.score}

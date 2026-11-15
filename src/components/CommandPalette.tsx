@@ -7,7 +7,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { catalog } from "../data/catalog";
 import { fuzzyScore } from "../lib/fuzzy";
-import { THEMES, THEME_LABELS, applyTheme } from "../lib/theme";
+import { SCENES, applyScene } from "../lib/scene";
 import { openItem } from "../lib/launcher";
 import { scrollToSection, setMatrix } from "../lib/effects";
 import { getMuted, setMuted } from "../lib/sound";
@@ -19,19 +19,18 @@ interface PaletteAction {
   label: string;
   /** Category shown on the right, also searchable. */
   group: string;
-  icon: string;
   run: () => void;
 }
 
 const capitalize = (s: string) => s[0]!.toUpperCase() + s.slice(1);
 
-/** Every action, built once at module load from the catalog, sections, and themes. */
+/** Every action, built once at module load from the catalog, sections, and scenes. */
 const ACTIONS: PaletteAction[] = [
-  ...SECTIONS.map((s) => ({ id: `go-${s}`, label: `Go to ${capitalize(s)}`, group: "Navigate", icon: "→", run: () => scrollToSection(s) })),
-  ...catalog.map((c) => ({ id: `open-${c.id}`, label: `${c.kind === "game" ? "Play" : "Open"} ${c.title}`, group: c.kind === "game" ? "Arcade" : "Toolkit", icon: c.icon, run: () => openItem(c.id) })),
-  ...THEMES.map((t) => ({ id: `theme-${t}`, label: `Theme: ${THEME_LABELS[t]}`, group: "Appearance", icon: "🎨", run: () => applyTheme(t) })),
-  { id: "sound", label: "Toggle sound effects", group: "Appearance", icon: "🔊", run: () => setMuted(!getMuted()) },
-  { id: "matrix", label: "Enter the Matrix", group: "Secrets", icon: "🐇", run: () => setMatrix(true) },
+  ...SECTIONS.map((s) => ({ id: `go-${s}`, label: `Go to ${capitalize(s)}`, group: "Navigate", run: () => scrollToSection(s) })),
+  ...catalog.map((c) => ({ id: `open-${c.id}`, label: `${c.kind === "game" ? "Play" : "Open"} ${c.title}`, group: c.kind === "game" ? "Games" : "Tools", run: () => openItem(c.id) })),
+  ...SCENES.map((s) => ({ id: `scene-${s.id}`, label: `Scene: ${s.name}`, group: "Background", run: () => applyScene(s.id) })),
+  { id: "sound", label: "Toggle sound effects", group: "Settings", run: () => setMuted(!getMuted()) },
+  { id: "matrix", label: "Enter the Matrix", group: "Secrets", run: () => setMatrix(true) },
 ];
 
 /** Ctrl/Cmd + K quick launcher with fuzzy search and full keyboard navigation. */
@@ -109,13 +108,12 @@ export function CommandPalette() {
       ref={dialogRef}
       onClose={() => setOpen(false)}
       onClick={(e) => e.target === e.currentTarget && setOpen(false)}
-      className="mx-auto mt-[12vh] w-[min(600px,calc(100vw-1.5rem))] rounded-2xl border border-border bg-surface p-0 text-text shadow-2xl shadow-accent/20"
+      className="mx-auto mt-[12vh] w-[min(600px,calc(100vw-1.5rem))] border border-text bg-bg p-0 text-text"
       aria-label="Command palette"
     >
       {open && (
         <div onKeyDown={onKeyDown}>
-          <div className="flex items-center gap-3 border-b border-border px-4">
-            <span className="font-mono text-accent">❯</span>
+          <div className="flex items-center gap-3 border-b border-border px-5">
             <input
               autoFocus
               value={query}
@@ -123,14 +121,14 @@ export function CommandPalette() {
                 setQuery(e.target.value);
                 setActive(0);
               }}
-              placeholder="Search actions, games, apps, themes..."
-              className="w-full bg-transparent py-4 outline-none placeholder:text-muted"
+              placeholder="Search tools, games, scenes, sections"
+              className="w-full bg-transparent py-4 text-lg outline-none placeholder:text-muted"
               role="combobox"
               aria-expanded="true"
               aria-controls="palette-list"
               aria-activedescendant={results[active] ? `pal-${results[active]!.id}` : undefined}
             />
-            <kbd className="chip">ESC</kbd>
+            <kbd className="label opacity-60">Esc</kbd>
           </div>
           <ul id="palette-list" ref={listRef} role="listbox" className="max-h-80 overflow-y-auto p-2">
             {results.map((a, i) => (
@@ -142,14 +140,13 @@ export function CommandPalette() {
                 aria-selected={i === active}
                 onMouseEnter={() => setActive(i)}
                 onClick={() => run(a)}
-                className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 ${i === active ? "bg-accent/15 text-text" : "text-muted"}`}
+                className={`flex cursor-pointer items-baseline gap-3 px-3 py-2.5 ${i === active ? "bg-text text-bg" : ""}`}
               >
-                <span className="w-6 text-center">{a.icon}</span>
                 <span className="flex-1">{a.label}</span>
-                <span className="font-mono text-xs text-muted">{a.group}</span>
+                <span className="label opacity-60">{a.group}</span>
               </li>
             ))}
-            {results.length === 0 && <li className="px-3 py-6 text-center text-muted">No matches. Try "play" or "theme".</li>}
+            {results.length === 0 && <li className="px-3 py-6 text-center text-muted">No matches. Try "play" or "scene".</li>}
           </ul>
         </div>
       )}
