@@ -36,11 +36,11 @@ export function GameOverlay({ phase, title, tagline, controls, score, scoreLabel
   if (phase === "playing" || phase === "intermission") return null;
 
   return (
-    <div className="absolute inset-0 grid place-items-center bg-bg/75 backdrop-blur-sm p-4 text-center">
+    <div className="absolute inset-0 grid place-items-center overflow-y-auto bg-bg/90 p-4 text-center">
       <div className="max-w-md">
         {phase === "menu" && (
           <>
-            <h3 className="font-mono text-3xl font-bold text-gradient">{title}</h3>
+            <h3 className="display text-4xl text-accent sm:text-5xl">{title}</h3>
             <p className="mt-2 text-muted">{tagline}</p>
             <ul className="mt-4 space-y-1 font-mono text-sm text-text/90">
               {controls.map((c) => (
@@ -57,7 +57,7 @@ export function GameOverlay({ phase, title, tagline, controls, score, scoreLabel
 
         {phase === "paused" && (
           <>
-            <h3 className="font-mono text-3xl font-bold text-accent">PAUSED</h3>
+            <h3 className="display text-4xl text-accent sm:text-5xl">Paused</h3>
             <p className="mt-2 text-muted">Take a breather. The bugs will wait.</p>
             <div className="mt-6 flex justify-center gap-3">
               <button className="btn btn-primary" onClick={onResume} autoFocus>
@@ -72,8 +72,8 @@ export function GameOverlay({ phase, title, tagline, controls, score, scoreLabel
 
         {phase === "over" && (
           <>
-            <h3 className="font-mono text-3xl font-bold text-gradient">{isRecord ? "NEW RECORD!" : "GAME OVER"}</h3>
-            <p className="mt-4 font-mono text-5xl font-bold">{score?.toLocaleString()}</p>
+            <h3 className="display text-4xl text-accent sm:text-5xl">{isRecord ? "New record" : "Game over"}</h3>
+            <p className="mt-4 font-mono text-5xl font-medium">{score?.toLocaleString()}</p>
             <p className="font-mono text-xs uppercase tracking-widest text-muted">{scoreLabel}</p>
             {best !== null && <p className="mt-2 font-mono text-sm text-muted">Personal best: {best.toLocaleString()}</p>}
             {children}

@@ -1,14 +1,14 @@
 /**
- * @file Application entry point. Applies the saved theme, then mounts React.
+ * @file Application entry point. Applies the saved scene, then mounts React.
  */
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
-import { applyTheme, getTheme } from "./lib/theme";
+import { applyScene, getScene } from "./lib/scene";
 import "./index.css";
 
-// Apply the saved theme before the first paint to avoid a flash of the default colors.
-applyTheme(getTheme());
+// Set the scene before the first paint, so the page never flashes the wrong palette.
+applyScene(getScene());
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

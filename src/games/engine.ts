@@ -18,7 +18,7 @@ import { useEffect, useRef } from "react";
 /*                                   Palette                                  */
 /* -------------------------------------------------------------------------- */
 
-/** Theme colors resolved to plain strings that the Canvas 2D API understands. */
+/** Palette colors resolved to plain strings that the Canvas 2D API understands. */
 export interface Palette {
   bg: string;
   surface: string;
@@ -33,11 +33,14 @@ export interface Palette {
 }
 
 /**
- * Reads the active theme's CSS variables so games re-skin with the site theme.
+ * Reads the game palette from CSS variables.
+ *
+ * Games always use the `.stage` palette (see index.css), which stays dark in every
+ * scene so that green for safe and red for danger remain easy to tell apart.
  * Called once when a game starts, never per frame (getComputedStyle forces style recalculation).
  */
 export function readPalette(): Palette {
-  const s = getComputedStyle(document.documentElement);
+  const s = getComputedStyle(document.querySelector(".stage") ?? document.documentElement);
   const v = (name: string) => s.getPropertyValue(name).trim();
   return {
     bg: v("--bg"),
@@ -46,7 +49,7 @@ export function readPalette(): Palette {
     text: v("--text"),
     muted: v("--muted"),
     accent: v("--accent"),
-    accent2: v("--accent-2"),
+    accent2: v("--accent-2") || v("--text"),
     good: v("--good"),
     bad: v("--bad"),
     warn: v("--warn"),
@@ -120,7 +123,7 @@ export function drawGrid(ctx: CanvasRenderingContext2D, w: number, h: number, co
 
 /**
  * Sets up a game canvas once on mount.
- * @returns Refs to the canvas element, its 2D context, and the theme palette.
+ * @returns Refs to the canvas element, its 2D context, and the game palette.
  */
 export function useGameCanvas(width: number, height: number) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -308,7 +311,7 @@ export function updatePopups(list: Popup[], dt: number) {
 }
 
 export function drawPopups(ctx: CanvasRenderingContext2D, list: Popup[]) {
-  ctx.font = "bold 14px 'JetBrains Mono', monospace";
+  ctx.font = "bold 14px 'DM Mono', monospace";
   ctx.textAlign = "center";
   for (const p of list) {
     ctx.globalAlpha = Math.min(p.life * 2, 1);

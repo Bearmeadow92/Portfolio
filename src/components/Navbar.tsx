@@ -1,19 +1,18 @@
 /**
- * @file Fixed top navigation: section links with scrollspy, a scroll progress bar,
- * theme and sound toggles, and a collapsible menu for small screens.
+ * @file Fixed top navigation: section links with scrollspy, a scroll progress line,
+ * the scene switcher, and a collapsible menu for small screens.
  */
 import { useEffect, useRef, useState } from "react";
 import { profile } from "../data/profile";
 import { useActiveSection } from "../hooks/useActiveSection";
-import { THEMES, THEME_LABELS, applyTheme, useTheme } from "../lib/theme";
 import { openPalette } from "./CommandPalette";
+import { SceneButton } from "./SceneSwitcher";
 import { SoundToggle } from "./SoundToggle";
 
 const LINKS = [
+  { id: "work", label: "Work" },
   { id: "about", label: "About" },
   { id: "skills", label: "Skills" },
-  { id: "arcade", label: "Arcade" },
-  { id: "toolkit", label: "Toolkit" },
   { id: "terminal", label: "Terminal" },
   { id: "source", label: "Source" },
   { id: "contact", label: "Contact" },
@@ -24,7 +23,6 @@ const SECTION_IDS = ["home", ...LINKS.map((l) => l.id)];
 
 export function Navbar() {
   const active = useActiveSection(SECTION_IDS);
-  const theme = useTheme();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const progressRef = useRef<HTMLDivElement>(null);
@@ -33,9 +31,9 @@ export function Navbar() {
    * Scroll handling, tuned to do as little work as possible:
    * - The listener is passive, so it can never block scrolling.
    * - Work is throttled to one update per animation frame.
-   * - The progress bar is updated by writing a transform directly to the DOM node.
+   * - The progress line is updated by writing a transform directly to the DOM node.
    *   Using React state here would re-render the whole navbar on every scroll frame.
-   * - `scrolled` is React state, but it only changes when crossing the 20px threshold
+   * - `scrolled` is React state, but it only changes when crossing the threshold
    *   (React skips re-renders when the new value equals the old one).
    */
   useEffect(() => {
@@ -44,7 +42,7 @@ export function Navbar() {
       const max = document.documentElement.scrollHeight - window.innerHeight;
       const progress = max > 0 ? window.scrollY / max : 0;
       if (progressRef.current) progressRef.current.style.transform = `scaleX(${progress})`;
-      setScrolled(window.scrollY > 20);
+      setScrolled(window.scrollY > 40);
       ticking = false;
     };
     const onScroll = () => {
@@ -57,66 +55,55 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  /** Advances to the next theme, wrapping around at the end of the list. */
-  const nextTheme = () => applyTheme(THEMES[(THEMES.indexOf(theme) + 1) % THEMES.length]!);
-
   return (
-    <header className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${scrolled ? "border-b border-border bg-bg/75 backdrop-blur-lg" : ""}`}>
-      <div ref={progressRef} className="h-0.5 origin-left bg-gradient-to-r from-accent to-accent-2" style={{ transform: "scaleX(0)" }} aria-hidden />
-      <nav className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3 sm:px-6" aria-label="Main">
-        <a href="#home" className="glitch font-mono text-lg font-bold" aria-label={`${profile.brand} home`}>
-          <span className="text-accent">&lt;</span>NGT<span className="text-accent-2"> /&gt;</span>
+    <header className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${scrolled || menuOpen ? "border-b border-border bg-bg" : "border-b border-transparent"}`}>
+      <nav className="mx-auto flex max-w-[1400px] items-center gap-6 px-5 py-4 sm:px-10" aria-label="Main">
+        <a href="#home" className="font-display text-xl font-extrabold tracking-tight" aria-label={`${profile.name}, back to top`}>
+          {profile.name}
+          <span className="text-accent">.</span>
         </a>
 
-        <ul className="ml-auto hidden items-center gap-1 lg:flex">
+        <ul className="ml-auto hidden items-center gap-7 lg:flex">
           {LINKS.map((l) => (
             <li key={l.id}>
-              <a
-                href={`#${l.id}`}
-                aria-current={active === l.id ? "true" : undefined}
-                className={`rounded-lg px-3 py-1.5 text-sm transition-colors ${active === l.id ? "bg-accent/10 text-accent" : "text-muted hover:text-text"}`}
-              >
+              <a href={`#${l.id}`} aria-current={active === l.id ? "true" : undefined} className={`label link py-1 ${active === l.id ? "text-accent" : ""}`}>
                 {l.label}
               </a>
             </li>
           ))}
         </ul>
 
-        <div className="ml-auto flex items-center gap-2 lg:ml-2">
-          <button onClick={openPalette} className="chip hidden hover:text-text sm:inline-flex" title="Open command palette (Ctrl + K)">
-            ⌘K
+        <div className="ml-auto flex items-center gap-5 lg:ml-4 lg:border-l lg:border-border lg:pl-6">
+          <SceneButton />
+          <span className="hidden md:inline">
+            <SoundToggle />
+          </span>
+          <button onClick={openPalette} className="label hidden py-1 hover:text-accent md:inline" title="Open the command palette">
+            Ctrl K
           </button>
-          <button onClick={nextTheme} className="chip hover:text-text" title="Cycle color theme">
-            🎨 <span className="hidden sm:inline">{THEME_LABELS[theme]}</span>
-          </button>
-          <SoundToggle />
-          <button
-            className="chip lg:hidden"
-            onClick={() => setMenuOpen((o) => !o)}
-            aria-expanded={menuOpen}
-            aria-controls="mobile-menu"
-            aria-label="Toggle menu"
-          >
-            {menuOpen ? "✕" : "☰"}
+          <button className="label py-1 lg:hidden" onClick={() => setMenuOpen((o) => !o)} aria-expanded={menuOpen} aria-controls="mobile-menu">
+            {menuOpen ? "Close" : "Menu"}
           </button>
         </div>
       </nav>
 
       {menuOpen && (
-        <ul id="mobile-menu" className="mx-4 mb-3 grid grid-cols-2 gap-2 rounded-xl border border-border bg-surface/95 p-3 backdrop-blur lg:hidden">
-          {LINKS.map((l) => (
+        <ul id="mobile-menu" className="border-t border-border px-5 py-3 lg:hidden">
+          {LINKS.map((l, i) => (
             <li key={l.id}>
-              <a
-                href={`#${l.id}`}
-                onClick={() => setMenuOpen(false)}
-                className={`block rounded-lg px-3 py-2 text-sm ${active === l.id ? "bg-accent/10 text-accent" : "text-muted"}`}
-              >
+              <a href={`#${l.id}`} onClick={() => setMenuOpen(false)} className={`flex items-baseline gap-4 py-2.5 font-display text-2xl font-bold ${active === l.id ? "text-accent" : ""}`}>
+                <span className="label w-6 opacity-60">0{i + 1}</span>
                 {l.label}
               </a>
             </li>
           ))}
+          <li className="mt-2 border-t border-border pt-3">
+            <SoundToggle />
+          </li>
         </ul>
       )}
+
+      <div ref={progressRef} className="absolute inset-x-0 bottom-0 h-px origin-left bg-accent" style={{ transform: "scaleX(0)" }} aria-hidden />
     </header>
   );
 }

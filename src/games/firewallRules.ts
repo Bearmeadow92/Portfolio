@@ -120,6 +120,7 @@ export type UpgradeId = "turret" | "capacitor" | "armor" | "tarpit" | "dpi" | "r
 export interface UpgradeDef {
   id: UpgradeId;
   name: string;
+  /** A single text glyph (not an emoji), so it renders the same on canvas and in the DOM. */
   icon: string;
   /** Maximum level. Repair is a consumable, so it has no cap. */
   max: number;
@@ -131,12 +132,12 @@ export interface UpgradeDef {
 const TURRET_INTERVALS = [Infinity, 2.2, 1.5, 1.0] as const;
 
 export const UPGRADES: Record<UpgradeId, UpgradeDef> = {
-  turret: { id: "turret", name: "Auto Turret", icon: "🎯", max: 3, describe: (l) => `The core zaps the nearest threat every ${TURRET_INTERVALS[l]}s.` },
-  capacitor: { id: "capacitor", name: "EMP Capacitor", icon: "⚡", max: 3, describe: (l) => `EMP charges ${l * 40}% faster.` },
-  armor: { id: "armor", name: "Hardened Core", icon: "🧱", max: 3, describe: (l) => `Breaches deal ${l * 20}% less damage.` },
-  tarpit: { id: "tarpit", name: "Tarpit", icon: "🕸️", max: 3, describe: (l) => `Threats inside the perimeter move ${l * 18}% slower.` },
-  dpi: { id: "dpi", name: "Deep Packet Inspection", icon: "🔍", max: 1, describe: () => "Unmasks trojans, and lets the turret target them." },
-  repair: { id: "repair", name: "Hot Patch", icon: "🩹", max: Infinity, describe: () => "Restore 35% integrity right now." },
+  turret: { id: "turret", name: "Auto Turret", icon: "◎", max: 3, describe: (l) => `The core zaps the nearest threat every ${TURRET_INTERVALS[l]}s.` },
+  capacitor: { id: "capacitor", name: "EMP Capacitor", icon: "↯", max: 3, describe: (l) => `EMP charges ${l * 40}% faster.` },
+  armor: { id: "armor", name: "Hardened Core", icon: "▣", max: 3, describe: (l) => `Breaches deal ${l * 20}% less damage.` },
+  tarpit: { id: "tarpit", name: "Tarpit", icon: "≋", max: 3, describe: (l) => `Threats inside the perimeter move ${l * 18}% slower.` },
+  dpi: { id: "dpi", name: "Deep Packet Inspection", icon: "⊙", max: 1, describe: () => "Unmasks trojans, and lets the turret target them." },
+  repair: { id: "repair", name: "Hot Patch", icon: "✚", max: Infinity, describe: () => "Restore 35% integrity right now." },
 };
 
 const UPGRADE_IDS = Object.keys(UPGRADES) as UpgradeId[];

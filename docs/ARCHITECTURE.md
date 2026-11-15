@@ -11,8 +11,10 @@ anyone reading the code, including future me.
    lives in refs and typed arrays, outside React's render cycle.
 3. **No allocations in hot loops.** Per-frame code reuses memory, so the garbage
    collector never causes a dropped frame.
-4. **Use the platform.** Canvas, `<dialog>`, Web Audio, Web Crypto, and Drag and Drop
-   cover everything here. The only runtime dependencies are React and React DOM.
+4. **Use the platform.** WebGL, Canvas, `<dialog>`, Web Audio, Web Crypto, and Drag and
+   Drop cover everything here. The only runtime dependencies are React and React DOM.
+5. **A quiet interface.** The page is type, hairlines, and space. Color and motion come
+   from the generative backdrop, so the two never compete.
 
 ## Layers
 
@@ -20,7 +22,8 @@ anyone reading the code, including future me.
 data/        Content (profile, skills, catalog). Edit these to personalize the site.
 lib/         Pure logic and tiny stores. No JSX.
 hooks/       Reusable React hooks.
-components/  Shared UI (navbar, launcher, palette, particle field).
+art/         The generative backdrop: GLSL shaders and the WebGL engine.
+components/  Shared UI (navbar, launcher, palette, buttons, cursor ring).
 sections/    Page sections, composed in App.tsx.
 games/       Canvas games. Each has a rules module (pure) and a component (rendering).
 apps/        Toolkit mini apps. Thin UI over lib/ functions.
@@ -37,8 +40,27 @@ There is no state library. Three patterns cover everything:
 | Kind of state | Where it lives | Example |
 | --- | --- | --- |
 | Local UI state | `useState` | Form fields, the active skill filter |
-| App-wide state | A 20 line observable store + `useSyncExternalStore` | Theme, open window, mute |
-| High frequency state | Mutable refs and typed arrays | Game worlds, particles |
+| App-wide state | A 20 line observable store + `useSyncExternalStore` | Scene, open window, mute |
+| High frequency state | Mutable refs, typed arrays, and direct DOM writes | Game worlds, cursor ring, backdrop |
+
+## The generative backdrop
+
+`src/art` draws the animated background as a full-screen WebGL2 fragment shader.
+
+- **Scenes** are fragment shaders in `shaders.ts`. They share a small noise library and a
+  fixed set of uniforms (time, pointer position, art intensity, a pulse, and three colors).
+- **The engine** (`Backdrop.tsx`) compiles a scene's program the first time it is shown and
+  caches it. Each frame uploads eight uniforms and draws one triangle. Nothing is allocated.
+- **Color** comes from CSS. Each scene's palette is a block of CSS variables in `index.css`.
+  The engine reads `--bg`, `--text`, and `--accent` when the scene changes and eases the
+  shader colors toward them, so a scene change crossfades. Components and Tailwind
+  utilities read the same variables, so the interface re-tints with no React re-render.
+- **Legibility**: a `u_dim` uniform tracks scroll position. The art is at full strength in
+  the hero and recedes behind the content below it.
+- **Staying fast**: the internal resolution steps down if frames run slow, the device pixel
+  ratio is capped at 1.5, and the loop stops when the tab is hidden or a window is open.
+- **Fallbacks**: without WebGL2 the canvas stays hidden and the flat page color shows.
+  With `prefers-reduced-motion` the engine draws one still frame on demand.
 
 ## Game architecture
 
@@ -55,8 +77,10 @@ Each canvas game follows the same shape:
 
 | Operation | Naive approach | This codebase | How |
 | --- | --- | --- | --- |
-| Link nearby hero particles | O(n²) all pairs | O(n) average | Spatial hash grid, cell size = link distance |
-| Draw hero particle links | One draw call per line | About 6 draw calls | Lines batched into opacity buckets |
+| Animate the backdrop | Canvas 2D on the CPU | One GPU draw call | Full-screen fragment shader, eight uniforms per frame |
+| Switch scenes | Recompile each time | O(1) after first use | Shader programs cached in a Map |
+| Re-tint the site per scene | Re-render components | No re-render | One attribute write, colors are CSS variables |
+| Cursor ring and button effects | React state per mouse move | No re-render | Direct style writes, loop stops when idle |
 | Remove a dead entity | O(n) `splice` | O(1) | Swap-remove |
 | Spawn and expire particles | Allocate objects | Zero allocation | Struct of arrays in `Float32Array`s |
 | Ball vs bricks | O(bricks) scan | O(1) | Uniform grid, test at most 4 cells |
@@ -87,8 +111,12 @@ Each canvas game follows the same shape:
 
 - Animations use `transform` and `opacity`, which run on the compositor without layout.
 - Canvas state changes (`fillStyle`, `font`) are minimized and paths are batched.
-- Offscreen work stops: the hero animation pauses when scrolled away or the tab is hidden.
-- The device pixel ratio is capped at 2, so 3x phones do not render 9x the pixels.
+- Idle work stops: the backdrop pauses when the tab is hidden or a window is open, and
+  the cursor ring's loop ends as soon as it catches up with the mouse.
+- No `backdrop-filter` blur anywhere. Blurring a full screen each frame cost more than the
+  games running on top of it (21 fps without a GPU, 60 fps after removing it).
+- The device pixel ratio is capped (1.5 for the backdrop, 2 for games), so 3x phones do
+  not render 9x the pixels.
 
 ## Security
 

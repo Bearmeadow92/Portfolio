@@ -52,7 +52,7 @@ export default function PasswordLab() {
       <div>
         <div className="flex gap-1" aria-hidden>
           {[0, 1, 2, 3, 4].map((i) => (
-            <div key={i} className={`h-2 flex-1 rounded-full transition-colors duration-300 ${password && i <= report.score ? BAR_COLORS[report.score] : "bg-border"}`} />
+            <div key={i} className={`h-2 flex-1 transition-colors duration-300 ${password && i <= report.score ? BAR_COLORS[report.score] : "bg-border"}`} />
           ))}
         </div>
         <div className="mt-3 grid grid-cols-3 gap-2 text-center font-mono text-xs">

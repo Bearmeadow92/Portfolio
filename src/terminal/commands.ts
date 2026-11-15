@@ -9,7 +9,7 @@
 import { profile } from "../data/profile";
 import { skills } from "../data/skills";
 import { catalog, findItem, itemsByKind } from "../data/catalog";
-import { THEMES, THEME_LABELS, isTheme, type ThemeName } from "../lib/theme";
+import { SCENES, isScene, sceneName, type SceneId } from "../lib/scene";
 
 /** Color hint for a line of output. */
 export type Tone = "text" | "accent" | "muted" | "good" | "bad" | "warn";
@@ -22,7 +22,7 @@ export interface Line {
 export type Action =
   | { type: "clear" }
   | { type: "navigate"; target: string }
-  | { type: "theme"; value: ThemeName }
+  | { type: "scene"; value: SceneId }
   | { type: "matrix" }
   | { type: "open"; id: string };
 
@@ -39,16 +39,16 @@ export interface CommandContext {
 }
 
 /** Section ids that `goto` (and the command palette) can scroll to. */
-export const SECTIONS = ["home", "about", "skills", "arcade", "toolkit", "terminal", "source", "contact"] as const;
+export const SECTIONS = ["home", "work", "about", "skills", "terminal", "source", "contact"] as const;
 
 /** The pretend filesystem behind `ls` and `cat`. */
 const FILES: Record<string, string[]> = {
-  "about.txt": [...profile.about],
+  "about.txt": [profile.about.lead, ...profile.about.body],
   "mission.txt": [
     "Mission: land a software engineering role on a team that ships great products.",
     "Method: keep learning, build in public, help the next technologist up the ladder.",
   ],
-  "secrets.txt": ["Permission denied. Nice try though. Least privilege is a lifestyle. 🔒"],
+  "secrets.txt": ["Permission denied. Nice try though. Least privilege is a lifestyle."],
 };
 
 /** Shorthand for building an output line. */
@@ -73,17 +73,17 @@ const commands: Record<string, Command> = {
           .filter(([, c]) => !c.hidden)
           .map(([name, c]) => l(`  ${(c.usage ?? name).padEnd(18)} ${c.description}`)),
         l(""),
-        l("Tip: use ↑ ↓ for history and Tab to autocomplete. There may be hidden commands. 👀", "muted"),
+        l("Tip: use ↑ ↓ for history and Tab to autocomplete. There may be hidden commands.", "muted"),
       ],
     }),
   },
   whoami: {
     description: "Who is behind this portfolio",
-    run: () => ({ lines: [l(`${profile.name}, ${profile.role}`, "accent"), l(profile.tagline)] }),
+    run: () => ({ lines: [l(`${profile.name}, ${profile.role}`, "accent"), l(profile.intro)] }),
   },
   about: {
     description: "Read my story",
-    run: () => ({ lines: profile.about.map((p) => l(p)), action: { type: "navigate", target: "about" } }),
+    run: () => ({ lines: [profile.about.lead, ...profile.about.body].map((p) => l(p)), action: { type: "navigate", target: "about" } }),
   },
   skills: {
     description: "Show skills, optionally by category",
@@ -132,14 +132,14 @@ const commands: Record<string, Command> = {
       return { lines: [l(`Launching ${item.title}...`, "good")], action: { type: "open", id: item.id } };
     },
   },
-  theme: {
-    description: "Switch the color theme",
-    usage: "theme [name]",
+  scene: {
+    description: "Switch the background scene",
+    usage: "scene [name]",
     run: (args) => {
       const name = args[0]?.toLowerCase();
-      if (!name) return { lines: [l("Themes: " + THEMES.map((t) => `${t} (${THEME_LABELS[t]})`).join(", "))] };
-      if (!isTheme(name)) return { lines: [l(`Unknown theme "${name}". Options: ${THEMES.join(", ")}`, "bad")] };
-      return { lines: [l(`Theme set to ${THEME_LABELS[name]}.`, "good")], action: { type: "theme", value: name } };
+      if (!name) return { lines: SCENES.map((s) => l(`  ${s.id.padEnd(10)} ${s.blurb}`)) };
+      if (!isScene(name)) return { lines: [l(`Unknown scene "${name}". Options: ${SCENES.map((s) => s.id).join(", ")}`, "bad")] };
+      return { lines: [l(`Scene set to ${sceneName(name)}.`, "good")], action: { type: "scene", value: name } };
     },
   },
   goto: {
@@ -176,7 +176,7 @@ const commands: Record<string, Command> = {
           l("  █▄▄▄▄▄▄▄█    Shell: ngt-sh 1.0", "accent"),
           l(`                Uptime: ${uptime}s`, "accent"),
           l(`                Commands run: ${ctx.history.length}`, "accent"),
-          l("                Status: Open to work ✅", "good"),
+          l("                Status: Open to work", "good"),
         ],
       };
     },
@@ -209,13 +209,13 @@ const commands: Record<string, Command> = {
         return {
           lines: [
             l("[sudo] verifying credentials... ✓", "muted"),
-            l("Access granted. Excellent decision. 🎉", "good"),
+            l("Access granted. Excellent decision.", "good"),
             l("Scrolling to the contact form so we can make it official.", "accent"),
           ],
           action: { type: "navigate", target: "contact" },
         };
       }
-      return { lines: [l("jesse is not in the sudoers file. This incident will be reported. 🚨", "bad"), l("(Hint: try 'sudo hire-jesse')", "muted")] };
+      return { lines: [l("jesse is not in the sudoers file. This incident will be reported.", "bad"), l("(Hint: try 'sudo hire-jesse')", "muted")] };
     },
   },
   matrix: {
@@ -226,14 +226,14 @@ const commands: Record<string, Command> = {
   coffee: {
     description: "Refuel",
     hidden: true,
-    run: () => ({ lines: [l("☕ Brewing... done. Productivity +25%. Bugs fear you now.", "warn")] }),
+    run: () => ({ lines: [l("Brewing... done. Productivity +25%. Bugs fear you now.", "warn")] }),
   },
   rm: {
     description: "Remove files",
     hidden: true,
     run: (args) =>
       args.join(" ").includes("-rf")
-        ? { lines: [l("Nice try. This system practices defense in depth. 😄", "bad")] }
+        ? { lines: [l("Nice try. This system practices defense in depth.", "bad")] }
         : { lines: [l("rm: refusing to delete anything on a portfolio. It took a while to build!", "warn")] },
   },
   exit: {
@@ -244,7 +244,7 @@ const commands: Record<string, Command> = {
 };
 
 /** Aliases map familiar commands from other shells onto ours. */
-const ALIASES: Record<string, string> = { cd: "goto", open: "play", dir: "ls", cls: "clear", "?": "help", man: "help" };
+const ALIASES: Record<string, string> = { cd: "goto", open: "play", dir: "ls", cls: "clear", "?": "help", man: "help", theme: "scene" };
 
 /** Visible command names, used for tab completion. */
 export const commandNames = Object.keys(commands).filter((n) => !commands[n]!.hidden);
@@ -271,6 +271,6 @@ export function complete(partial: string): string[] {
   const [cmd, arg = ""] = parts;
   const resolved = ALIASES[cmd!.toLowerCase()] ?? cmd!.toLowerCase();
   const pool: readonly string[] =
-    resolved === "play" ? catalog.map((c) => c.id) : resolved === "goto" ? SECTIONS : resolved === "theme" ? THEMES : resolved === "cat" ? Object.keys(FILES) : [];
+    resolved === "play" ? catalog.map((c) => c.id) : resolved === "goto" ? SECTIONS : resolved === "scene" ? SCENES.map((s) => s.id) : resolved === "cat" ? Object.keys(FILES) : [];
   return pool.filter((p) => p.startsWith(arg.toLowerCase())).map((p) => `${cmd} ${p}`);
 }

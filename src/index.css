@@ -1,81 +1,109 @@
 /*
   Global styles for the NextGenTechnologist portfolio.
 
-  Contents:
-    1. Design tokens (one block per theme)
+  Art direction
+  -------------
+  A quiet interface over living art. The page itself is almost empty: large type,
+  hairlines, generous space, square corners, no drop shadows and no gradients.
+  All of the color and movement comes from the generative backdrop (src/art), and
+  each backdrop "scene" brings its own small palette that re-tints the whole site.
+
+  Contents
+    1. Scene palettes (design tokens)
     2. Tailwind theme mapping
     3. Base element styles
-    4. Reusable component classes (.panel, .btn, .input, .chip)
-    5. Animations
+    4. Components (.display, .label, .btn, .row, .panel, .chip, .input)
+    5. Motion (reveals, marquee, cursor ring)
     6. Reduced motion overrides
 */
 @import "tailwindcss";
 
 /*
-  1. Design tokens.
-  Every theme only redefines these variables, so components never hardcode colors.
-  Tailwind utilities like `bg-accent/20` are wired to them in the @theme block below.
+  1. Scene palettes.
+  Every scene sets the same variables. Components only ever use these variables, and
+  the WebGL backdrop reads --bg, --text and --accent from here too, so CSS is the
+  single source of truth for color.
 */
 :root,
-[data-theme="cyber"] {
-  --bg: #05070d;
-  --surface: #0b1020;
-  --surface-2: #111830;
-  --border: #1e2a4a;
-  --text: #e6edf7;
-  --muted: #8b98b8;
-  --accent: #22d3ee;
-  --accent-2: #a855f7;
-  --good: #4ade80;
-  --bad: #f87171;
-  --warn: #fbbf24;
-}
-
-[data-theme="matrix"] {
-  --bg: #020803;
-  --surface: #06140a;
-  --surface-2: #0a1f10;
-  --border: #12391d;
-  --text: #d9ffe3;
-  --muted: #7fb08d;
-  --accent: #39ff6a;
-  --accent-2: #b4ff39;
-  --good: #39ff6a;
-  --bad: #ff5f5f;
-  --warn: #e5ff39;
-}
-
-[data-theme="sunset"] {
-  --bg: #0d0610;
-  --surface: #1a0d1f;
-  --surface-2: #24112b;
-  --border: #3d1d47;
-  --text: #fdeef7;
-  --muted: #c09ab3;
-  --accent: #fb923c;
-  --accent-2: #ec4899;
-  --good: #4ade80;
-  --bad: #f87171;
-  --warn: #facc15;
-}
-
-/* Daylight: a light theme, which proves the tokens are not tied to dark mode. */
-[data-theme="daylight"] {
-  --bg: #f4f6fb;
-  --surface: #ffffff;
-  --surface-2: #e9eef7;
-  --border: #cbd5e6;
-  --text: #0f172a;
-  --muted: #51607a;
-  --accent: #0e7490;
-  --accent-2: #7c3aed;
-  --good: #15803d;
-  --bad: #dc2626;
-  --warn: #b45309;
+[data-scene="contour"] {
+  --bg: #f3f0e9;
+  --surface: #faf8f3;
+  --surface-2: #e8e4da;
+  --border: #d2cec3;
+  --text: #171713;
+  --muted: #625f56;
+  --accent: #c8340f;
+  --good: #1c7a3e;
+  --bad: #c8340f;
+  --warn: #8f5500;
   color-scheme: light;
 }
 
-/* Maps the tokens onto Tailwind color utilities (bg-accent, text-muted, border-border, ...). */
+[data-scene="halftone"] {
+  --bg: #0b0b0c;
+  --surface: #141416;
+  --surface-2: #1e1e21;
+  --border: #2e2e32;
+  --text: #f1efe9;
+  --muted: #a09e96;
+  --accent: #c8ff3e;
+  --good: #5fdc8f;
+  --bad: #ff6a4d;
+  --warn: #f0b24a;
+  color-scheme: dark;
+}
+
+[data-scene="ripple"] {
+  --bg: #111012;
+  --surface: #19181b;
+  --surface-2: #242327;
+  --border: #353338;
+  --text: #f1ece2;
+  --muted: #a5a199;
+  --accent: #e9b44c;
+  --good: #6fe09a;
+  --bad: #ff7a5c;
+  --warn: #e9b44c;
+  color-scheme: dark;
+}
+
+[data-scene="signal"] {
+  --bg: #1b32d6;
+  --surface: #2038dd;
+  --surface-2: #162abc;
+  --border: #5165ec;
+  --text: #ffffff;
+  --muted: #c9d0ff;
+  --accent: #ffe14a;
+  --good: #a6ffc4;
+  --bad: #ffc2b3;
+  --warn: #ffe14a;
+  color-scheme: dark;
+}
+
+/*
+  The stage: games always run on the same dark surface, whatever the scene, so their
+  green means safe and red means danger colors stay readable. Redefining the variables
+  on a container re-skins everything inside it, Tailwind utilities included.
+*/
+.stage {
+  --bg: #0b0b0c;
+  --surface: #151517;
+  --surface-2: #1f1f22;
+  --border: #323236;
+  --text: #f1efe9;
+  --muted: #a09e96;
+  --accent: #ffd166;
+  --accent-2: #7cc4ff;
+  --good: #5fdc8f;
+  --bad: #ff5c4d;
+  --warn: #ff9f43;
+  color-scheme: dark;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* 2. Maps the tokens onto Tailwind utilities (bg-accent, text-muted, border-border, ...). */
 @theme inline {
   --color-bg: var(--bg);
   --color-surface: var(--surface);
@@ -84,139 +112,272 @@
   --color-text: var(--text);
   --color-muted: var(--muted);
   --color-accent: var(--accent);
-  --color-accent-2: var(--accent-2);
+  --color-accent-2: var(--accent-2, var(--text));
   --color-good: var(--good);
   --color-bad: var(--bad);
   --color-warn: var(--warn);
-  --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+  --font-sans: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "DM Mono", ui-monospace, "SFMono-Regular", monospace;
+  --font-display: "Syne", "Instrument Sans", sans-serif;
 }
 
+/* Square corners everywhere: every `rounded-*` utility except `rounded-full` resolves to zero. */
+@theme {
+  --radius-xs: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
+}
+
+/* 3. Base element styles. */
 @layer base {
   html {
     scroll-behavior: smooth;
-    color-scheme: dark;
+    background: var(--bg);
   }
   body {
-    background: var(--bg);
     color: var(--text);
     font-family: var(--font-sans);
+    font-size: 1.0625rem;
+    line-height: 1.55;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
-    transition: background-color 0.4s ease, color 0.4s ease;
+    transition: color 0.5s ease;
   }
   ::selection {
-    background: color-mix(in srgb, var(--accent) 35%, transparent);
+    background: var(--accent);
+    color: var(--bg);
   }
   :focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 3px;
-    border-radius: 6px;
   }
-  /* Themed scrollbar. */
   * {
     scrollbar-width: thin;
-    scrollbar-color: var(--border) transparent;
+    scrollbar-color: var(--muted) transparent;
+  }
+  input[type="range"] {
+    accent-color: var(--accent);
   }
 }
 
+/* 4. Components. */
 @layer components {
-  /* Glassy card used across the site. */
-  .panel {
-    background: color-mix(in srgb, var(--surface) 82%, transparent);
-    border: 1px solid var(--border);
-    border-radius: 1rem;
-    backdrop-filter: blur(10px);
+  /* Headline type: wide, heavy, tightly set. */
+  .display {
+    font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: -0.045em;
+    line-height: 0.92;
   }
-  .panel-hover {
-    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+
+  /* Small uppercase monospace label. */
+  .label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
   }
-  .panel-hover:hover {
-    transform: translateY(-4px);
-    border-color: color-mix(in srgb, var(--accent) 60%, var(--border));
-    box-shadow: 0 12px 40px -12px color-mix(in srgb, var(--accent) 45%, transparent);
-  }
-  .text-gradient {
-    background: linear-gradient(100deg, var(--accent), var(--accent-2));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
+
+  /*
+    Liquid button. On hover, a disc of color grows outward from the exact point where
+    the pointer entered (--x and --y are set by the Button component), then the label
+    flips to the contrasting color.
+  */
   .btn {
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    padding: 0.65rem 1.2rem;
-    border-radius: 0.75rem;
-    font-weight: 600;
-    transition: transform 0.15s ease, box-shadow 0.2s ease, background-color 0.2s ease;
-    cursor: pointer;
-  }
-  .btn:active {
-    transform: scale(0.97);
-  }
-  .btn-primary {
-    background: linear-gradient(100deg, var(--accent), var(--accent-2));
-    color: var(--bg);
-    box-shadow: 0 0 24px -6px var(--accent);
-  }
-  .btn-primary:hover {
-    box-shadow: 0 0 36px -4px var(--accent);
-  }
-  .btn-ghost {
-    border: 1px solid var(--border);
-    background: color-mix(in srgb, var(--surface-2) 70%, transparent);
-    color: var(--text);
-  }
-  .btn-ghost:hover {
-    border-color: var(--accent);
-  }
-  .input {
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 0.6rem;
-    padding: 0.55rem 0.8rem;
-    color: var(--text);
+    gap: 0.6rem;
+    overflow: hidden;
+    isolation: isolate;
+    padding: 0.95rem 1.5rem;
+    border: 1px solid var(--text);
     font-family: var(--font-mono);
-    font-size: 0.9rem;
-    transition: border-color 0.2s ease;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text);
+    cursor: pointer;
+    transition: color 0.3s ease, transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
-  .input:focus {
-    outline: none;
+  .btn::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    left: var(--x, 50%);
+    top: var(--y, 50%);
+    width: 2.6em;
+    height: 2.6em;
+    border-radius: 50%;
+    background: var(--text);
+    transform: translate(-50%, -50%) scale(0);
+    transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .btn:hover:not(:disabled)::before,
+  .btn:focus-visible::before {
+    transform: translate(-50%, -50%) scale(18);
+  }
+  .btn:hover:not(:disabled),
+  .btn:focus-visible {
+    color: var(--bg);
+  }
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+  /* Primary: starts filled, and the disc that grows over it is the accent color. */
+  .btn-primary {
+    background: var(--text);
+    color: var(--bg);
+  }
+  .btn-primary::before {
+    background: var(--accent);
+  }
+  .btn-primary:hover:not(:disabled),
+  .btn-primary:focus-visible {
     border-color: var(--accent);
   }
+
+  /* Text link with an underline that draws itself in from the left. */
+  .link {
+    background: linear-gradient(currentColor, currentColor) no-repeat 0 100% / 0 1px;
+    transition: background-size 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .link:hover,
+  .link:focus-visible {
+    background-size: 100% 1px;
+  }
+
+  /*
+    Index row (used for the work list). Hovering wipes the row to the inverse colors
+    from the bottom edge up.
+  */
+  .row {
+    position: relative;
+    isolation: isolate;
+    border-top: 1px solid var(--border);
+    transition: color 0.25s ease;
+  }
+  .row::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--text);
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .row:hover,
+  .row:focus-visible {
+    color: var(--bg);
+  }
+  .row:hover::before,
+  .row:focus-visible::before {
+    transform: scaleY(1);
+  }
+
+  /* Solid surface for dense content (forms, tables, the terminal) so it stays readable over the art. */
+  .panel {
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .panel-hover {
+    transition: border-color 0.15s;
+  }
+  .panel-hover:hover {
+    border-color: var(--text);
+  }
+
   .chip {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    padding: 0.2rem 0.6rem;
-    border-radius: 999px;
+    padding: 0.25rem 0.6rem;
     border: 1px solid var(--border);
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     color: var(--muted);
+    transition: border-color 0.15s, color 0.15s;
   }
-  /* Subtle animated grid behind sections. */
-  .grid-bg {
-    background-image:
-      linear-gradient(color-mix(in srgb, var(--border) 45%, transparent) 1px, transparent 1px),
-      linear-gradient(90deg, color-mix(in srgb, var(--border) 45%, transparent) 1px, transparent 1px);
-    background-size: 48px 48px;
-    mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+  button.chip {
+    cursor: pointer;
+  }
+  button.chip:hover:not(:disabled) {
+    border-color: var(--text);
+    color: var(--text);
+  }
+
+  .input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 0.7rem 0.8rem;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    transition: border-color 0.15s;
+  }
+  .input:focus {
+    outline: none;
+    border-color: var(--text);
+  }
+  .input::placeholder {
+    color: var(--muted);
+    opacity: 0.7;
   }
 }
+
+/* 5. Motion. */
 
 /* Scroll reveal, toggled by the <Reveal> component via IntersectionObserver. */
 .reveal {
   opacity: 0;
-  transform: translateY(28px);
-  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transform: translateY(22px);
+  transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .reveal.is-visible {
   opacity: 1;
   transform: none;
+}
+
+/* Hero headline: each line rises out from behind a mask. */
+.rise {
+  display: block;
+  overflow: hidden;
+}
+.rise > span {
+  display: block;
+  animation: rise 1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: var(--delay, 0s);
+}
+@keyframes rise {
+  from {
+    transform: translateY(105%);
+  }
+}
+
+/* Endless horizontal ticker. The track holds two copies of its content, so -50% loops seamlessly. */
+.marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 48s linear infinite;
+}
+.marquee:hover {
+  animation-play-state: paused;
+}
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 @keyframes blink {
@@ -224,65 +385,19 @@
     opacity: 0;
   }
 }
-.caret::after {
-  content: "▋";
-  margin-left: 2px;
-  color: var(--accent);
-  animation: blink 1s steps(1) infinite;
+.blink {
+  animation: blink 1.1s steps(1) infinite;
 }
 
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-@keyframes glitch {
-  0%,
-  100% {
-    text-shadow: none;
-    transform: none;
-  }
-  20% {
-    text-shadow: -2px 0 var(--accent-2), 2px 0 var(--accent);
-    transform: translate(1px, -1px);
-  }
-  40% {
-    text-shadow: 2px 0 var(--accent-2), -2px 0 var(--accent);
-    transform: translate(-1px, 1px);
-  }
-  60% {
-    text-shadow: none;
-    transform: none;
-  }
-}
-.glitch:hover {
-  animation: glitch 0.45s linear;
-}
-
-@keyframes scan {
-  from {
-    transform: translateY(-100%);
-  }
-  to {
-    transform: translateY(100vh);
-  }
-}
-
-/* Native <dialog> styling for game and app windows. */
+/*
+  Native <dialog> backdrop. A flat scrim, deliberately without backdrop-filter blur:
+  blurring a full screen every frame costs more than the games running on top of it.
+*/
 dialog::backdrop {
-  background: color-mix(in srgb, var(--bg) 75%, transparent);
-  backdrop-filter: blur(6px);
+  background: color-mix(in srgb, var(--bg) 86%, transparent);
 }
 
-/* Respect users who prefer less motion. Accessibility is a feature. */
+/* 6. Respect users who prefer less motion. Accessibility is a feature. */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -297,5 +412,10 @@ dialog::backdrop {
   .reveal {
     opacity: 1;
     transform: none;
+  }
+  .marquee {
+    animation: none;
+    flex-wrap: wrap;
+    width: auto;
   }
 }

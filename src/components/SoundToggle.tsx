@@ -1,5 +1,5 @@
 /**
- * @file Mute and unmute button for the synthesized sound effects.
+ * @file Mute and unmute control for the synthesized sound effects.
  */
 import { setMuted, sfx, useMuted } from "../lib/sound";
 
@@ -12,12 +12,11 @@ export function SoundToggle() {
         setMuted(!muted);
         if (muted) sfx.click();
       }}
-      className="chip hover:text-text"
+      className="label py-1 hover:text-accent"
       aria-pressed={!muted}
       title={muted ? "Unmute sound effects" : "Mute sound effects"}
     >
-      {muted ? "🔇" : "🔊"}
-      <span className="sr-only">{muted ? "Sound off" : "Sound on"}</span>
+      Sound {muted ? "off" : "on"}
     </button>
   );
 }

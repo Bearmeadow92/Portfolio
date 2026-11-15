@@ -91,7 +91,7 @@ export default function CryptoKit() {
               </div>
             </div>
             {error ? (
-              <p className="font-mono text-sm text-bad" role="alert">⚠ {error}</p>
+              <p className="font-mono text-sm text-bad" role="alert">{error}</p>
             ) : (
               <code className="block break-all font-mono text-sm text-text/90">{output || "…"}</code>
             )}

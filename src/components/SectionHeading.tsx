@@ -1,21 +1,24 @@
 /**
- * @file Consistent numbered heading used at the top of every page section.
+ * @file Consistent heading used at the top of every page section.
  */
+import type { ReactNode } from "react";
 import { Reveal } from "./Reveal";
 
 /**
- * @param index  Two digit section number, such as "03".
- * @param kicker Short lowercase label shown beside the number.
- * @param title  The heading text.
+ * @param index Two digit section number, such as "03".
+ * @param label Short name of the section, shown small beside the number.
+ * @param title The headline.
  */
-export function SectionHeading({ index, kicker, title, children }: { index: string; kicker: string; title: string; children?: React.ReactNode }) {
+export function SectionHeading({ index, label, title, children }: { index: string; label: string; title: string; children?: ReactNode }) {
   return (
-    <Reveal className="mb-10 max-w-2xl">
-      <p className="font-mono text-sm text-accent">
-        <span className="text-muted">{index} //</span> {kicker}
+    <Reveal className="mb-12 grid gap-4 md:grid-cols-[10rem_1fr]">
+      <p className="label pt-3 opacity-70">
+        <span className="text-accent">{index}</span> &nbsp;{label}
       </p>
-      <h2 className="glitch mt-2 text-3xl font-bold tracking-tight sm:text-4xl">{title}</h2>
-      {children && <p className="mt-3 text-lg text-muted">{children}</p>}
+      <div>
+        <h2 className="display text-[clamp(2.4rem,6.5vw,5.5rem)]">{title}</h2>
+        {children && <p className="mt-5 max-w-2xl text-xl text-muted">{children}</p>}
+      </div>
     </Reveal>
   );
 }

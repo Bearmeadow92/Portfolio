@@ -11,6 +11,6 @@ describe("fuzzyScore", () => {
   });
 
   it("prefers consecutive and word start matches", () => {
-    expect(fuzzyScore("theme", "Theme: Matrix")).toBeGreaterThan(fuzzyScore("theme", "The mega menu"));
+    expect(fuzzyScore("scene", "Scene: Ripple")).toBeGreaterThan(fuzzyScore("scene", "Second chance menu"));
   });
 });
