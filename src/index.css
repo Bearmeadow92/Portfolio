@@ -1,7 +1,18 @@
+/*
+  Global styles for the NextGenTechnologist portfolio.
+
+  Contents:
+    1. Design tokens (one block per theme)
+    2. Tailwind theme mapping
+    3. Base element styles
+    4. Reusable component classes (.panel, .btn, .input, .chip)
+    5. Animations
+    6. Reduced motion overrides
+*/
 @import "tailwindcss";
 
 /*
-  Design tokens.
+  1. Design tokens.
   Every theme only redefines these variables, so components never hardcode colors.
   Tailwind utilities like `bg-accent/20` are wired to them in the @theme block below.
 */
@@ -48,21 +59,23 @@
   --warn: #facc15;
 }
 
-/* Semper Fi: scarlet and gold. */
-[data-theme="marine"] {
-  --bg: #0b0606;
-  --surface: #170c0c;
-  --surface-2: #211111;
-  --border: #3d1a1a;
-  --text: #fbf3e6;
-  --muted: #bfa58a;
-  --accent: #fcc419;
-  --accent-2: #e03131;
-  --good: #69db7c;
-  --bad: #ff6b6b;
-  --warn: #fcc419;
+/* Daylight: a light theme, which proves the tokens are not tied to dark mode. */
+[data-theme="daylight"] {
+  --bg: #f4f6fb;
+  --surface: #ffffff;
+  --surface-2: #e9eef7;
+  --border: #cbd5e6;
+  --text: #0f172a;
+  --muted: #51607a;
+  --accent: #0e7490;
+  --accent-2: #7c3aed;
+  --good: #15803d;
+  --bad: #dc2626;
+  --warn: #b45309;
+  color-scheme: light;
 }
 
+/* Maps the tokens onto Tailwind color utilities (bg-accent, text-muted, border-border, ...). */
 @theme inline {
   --color-bg: var(--bg);
   --color-surface: var(--surface);

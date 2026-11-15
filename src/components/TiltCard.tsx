@@ -1,3 +1,6 @@
+/**
+ * @file Card with a pointer-following 3D tilt and spotlight glow.
+ */
 import { useRef, type ReactNode } from "react";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 

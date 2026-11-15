@@ -1,3 +1,6 @@
+/**
+ * @file Section wrapper around the interactive terminal.
+ */
 import { Terminal } from "../terminal/Terminal";
 import { Reveal } from "../components/Reveal";
 import { SectionHeading } from "../components/SectionHeading";

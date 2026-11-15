@@ -1,5 +1,5 @@
 /**
- * Tiny synthesizer built on the Web Audio API.
+ * @file Tiny synthesizer built on the Web Audio API.
  * No audio files are downloaded: every sound effect is generated from oscillators,
  * which keeps the bundle small and shows off a lesser-known HTML5 API.
  */
@@ -26,6 +26,14 @@ function audio() {
   return ctx;
 }
 
+/**
+ * Plays one synthesized note.
+ * @param freq     Starting pitch in hertz.
+ * @param duration Length in seconds.
+ * @param wave     Oscillator shape, which sets the timbre.
+ * @param volume   Peak gain. Kept low so effects never startle.
+ * @param slideTo  Optional pitch to glide to, for "pew" style sweeps.
+ */
 function tone(freq: number, duration: number, wave: Wave = "square", volume = 0.06, slideTo?: number) {
   if (muted) return;
   try {
@@ -48,6 +56,7 @@ function tone(freq: number, duration: number, wave: Wave = "square", volume = 0.
   }
 }
 
+/** Named sound effects used by the games and UI. Each is a no-op while muted. */
 export const sfx = {
   click: () => tone(660, 0.05, "square", 0.03),
   hit: () => tone(880, 0.08, "square", 0.05, 1320),
@@ -67,6 +76,7 @@ export const sfx = {
   },
 };
 
+/** Mutes or unmutes all sound, remembers the choice, and notifies subscribed components. */
 export function setMuted(value: boolean) {
   muted = value;
   try {
@@ -89,4 +99,5 @@ export function useMuted() {
   );
 }
 
+/** Current mute flag, for non-React callers. */
 export const getMuted = () => muted;

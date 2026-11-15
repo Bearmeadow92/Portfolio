@@ -1,3 +1,6 @@
+/**
+ * @file Typewriter text effect for the hero.
+ */
 import { useEffect, useState } from "react";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 

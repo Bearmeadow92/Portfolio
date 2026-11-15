@@ -1,3 +1,6 @@
+/**
+ * @file Maps catalog ids to lazily loaded React components (code splitting).
+ */
 import { lazy, type ComponentType, type LazyExoticComponent } from "react";
 
 type Loader = () => Promise<{ default: ComponentType }>;

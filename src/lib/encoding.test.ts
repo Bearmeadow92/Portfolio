@@ -1,8 +1,11 @@
+/**
+ * @file Unit tests for encoding.ts.
+ */
 import { describe, expect, it } from "vitest";
 import { codecs, hash, rot13, type Codec } from "./encoding";
 
 describe("codecs", () => {
-  const samples = ["Hello, world!", "Semper Fi 🦅", "ünïcødé ✓", ""];
+  const samples = ["Hello, world!", "Ship it 🚀", "ünïcødé ✓", ""];
 
   it("round trips every codec, including emoji", () => {
     for (const name of Object.keys(codecs) as Codec[]) {

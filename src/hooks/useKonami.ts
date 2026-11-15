@@ -1,5 +1,9 @@
+/**
+ * @file Konami code detector (up, up, down, down, left, right, left, right, B, A).
+ */
 import { useEffect } from "react";
 
+/** The key sequence, matched one key at a time. */
 const SEQUENCE = [
   "ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown",
   "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight",
@@ -9,6 +13,7 @@ const SEQUENCE = [
 /** Fires `onUnlock` when the classic up-up-down-down cheat code is typed. */
 export function useKonami(onUnlock: () => void) {
   useEffect(() => {
+    // Index of the next expected key. Matching is O(1) per key press.
     let progress = 0;
     const onKey = (e: KeyboardEvent) => {
       const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;

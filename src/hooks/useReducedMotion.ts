@@ -1,3 +1,6 @@
+/**
+ * @file Tracks the user's "prefers-reduced-motion" accessibility setting.
+ */
 import { useSyncExternalStore } from "react";
 
 const QUERY = "(prefers-reduced-motion: reduce)";

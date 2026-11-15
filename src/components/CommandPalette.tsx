@@ -1,3 +1,9 @@
+/**
+ * @file Ctrl/Cmd + K command palette with fuzzy search.
+ *
+ * Ranking cost is O(a * L) per keystroke for a actions with labels of length L
+ * (about 25 short strings), which is far below one millisecond.
+ */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { catalog } from "../data/catalog";
 import { fuzzyScore } from "../lib/fuzzy";
@@ -9,7 +15,9 @@ import { SECTIONS } from "../terminal/commands";
 
 interface PaletteAction {
   id: string;
+  /** Text shown in the list and matched by the fuzzy search. */
   label: string;
+  /** Category shown on the right, also searchable. */
   group: string;
   icon: string;
   run: () => void;
@@ -17,6 +25,7 @@ interface PaletteAction {
 
 const capitalize = (s: string) => s[0]!.toUpperCase() + s.slice(1);
 
+/** Every action, built once at module load from the catalog, sections, and themes. */
 const ACTIONS: PaletteAction[] = [
   ...SECTIONS.map((s) => ({ id: `go-${s}`, label: `Go to ${capitalize(s)}`, group: "Navigate", icon: "→", run: () => scrollToSection(s) })),
   ...catalog.map((c) => ({ id: `open-${c.id}`, label: `${c.kind === "game" ? "Play" : "Open"} ${c.title}`, group: c.kind === "game" ? "Arcade" : "Toolkit", icon: c.icon, run: () => openItem(c.id) })),
@@ -33,6 +42,7 @@ export function CommandPalette() {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
 
+  // Global shortcut, plus a custom event so other components can open the palette.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
@@ -49,6 +59,7 @@ export function CommandPalette() {
     };
   }, []);
 
+  // Keep the native dialog in sync with React state.
   useEffect(() => {
     const d = dialogRef.current;
     if (!d) return;
@@ -68,6 +79,7 @@ export function CommandPalette() {
       .map((r) => r.a);
   }, [query]);
 
+  // Keep the highlighted row visible while arrowing through a long list.
   useEffect(() => {
     listRef.current?.querySelector(`[data-index="${active}"]`)?.scrollIntoView({ block: "nearest" });
   }, [active]);

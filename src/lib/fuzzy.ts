@@ -1,4 +1,8 @@
 /**
+ * @file Fuzzy string matching for the command palette.
+ */
+
+/**
  * Subsequence fuzzy matcher, similar in spirit to VS Code's quick open.
  * Returns a score (higher is better) or -1 for no match. O(n + m) single pass.
  * Consecutive matches and matches at word starts earn bonus points.

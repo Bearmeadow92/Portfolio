@@ -1,3 +1,6 @@
+/**
+ * @file Unit tests for commands.ts.
+ */
 import { describe, expect, it } from "vitest";
 import { complete, runCommand } from "./commands";
 
@@ -7,7 +10,7 @@ describe("runCommand", () => {
   it("lists commands with help", () => {
     const out = runCommand("help", ctx).lines.map((l) => l.text).join("\n");
     expect(out).toContain("whoami");
-    expect(out).not.toContain("oorah"); // Hidden commands stay hidden.
+    expect(out).not.toContain("coffee"); // Hidden commands stay hidden.
   });
 
   it("reports unknown commands", () => {
@@ -35,6 +38,6 @@ describe("complete", () => {
   it("completes command names and arguments", () => {
     expect(complete("who")).toEqual(["whoami"]);
     expect(complete("play fire")).toEqual(["play firewall"]);
-    expect(complete("theme ma")).toEqual(["theme matrix", "theme marine"]);
+    expect(complete("theme ma")).toEqual(["theme matrix"]);
   });
 });

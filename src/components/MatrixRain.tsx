@@ -1,8 +1,12 @@
+/**
+ * @file Full screen "digital rain" easter egg, drawn on canvas.
+ */
 import { useEffect, useRef } from "react";
 import { setMatrix, useMatrix } from "../lib/effects";
 import { sfx } from "../lib/sound";
 
-const GLYPHS = "アイウエオカキクケコサシスセソタチツテトナニヌネノ01010011SEMPERFI<>{}[]$#";
+/** Characters the rain is made of. */
+const GLYPHS = "アイウエオカキクケコサシスセソタチツテトナニヌネノ0101001101<>{}[]$#=;";
 
 /** Full screen digital rain. Unlocked by the Konami code or the `matrix` terminal command. */
 export function MatrixRain() {

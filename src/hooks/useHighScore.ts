@@ -1,3 +1,6 @@
+/**
+ * @file Per-game best score, persisted in localStorage.
+ */
 import { useCallback } from "react";
 import { useLocalStorage } from "./useLocalStorage";
 

@@ -1,3 +1,6 @@
+/**
+ * @file Window host for games and apps, built on the native <dialog> element.
+ */
 import { Suspense, useEffect, useRef } from "react";
 import { closeItem, useActiveItem } from "../lib/launcher";
 import { findItem } from "../data/catalog";
@@ -6,6 +9,7 @@ import { SoundToggle } from "./SoundToggle";
 
 /**
  * Hosts whichever game or app is open inside a native <dialog>.
+ * The component for the open item is lazy loaded, so its code is only downloaded on demand.
  * showModal() gives us a focus trap, Escape to close, and an inert background for free.
  */
 export function Launcher() {
@@ -15,6 +19,7 @@ export function Launcher() {
   const item = activeId ? findItem(activeId) : undefined;
   const Component = activeId ? registry[activeId] : undefined;
 
+  // Open or close the native dialog to match the launcher store.
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
@@ -22,6 +27,7 @@ export function Launcher() {
     if (!item && dialog.open) dialog.close();
   }, [item]);
 
+  /** Fullscreen API: expands just the game area, not the whole page. */
   const toggleFullscreen = () => {
     if (document.fullscreenElement) void document.exitFullscreen();
     else void bodyRef.current?.requestFullscreen?.();

@@ -1,3 +1,6 @@
+/**
+ * @file Unit tests for subnet.ts.
+ */
 import { describe, expect, it } from "vitest";
 import { calculateSubnet, parseIp, toIp } from "./subnet";
 

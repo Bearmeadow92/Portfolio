@@ -1,3 +1,6 @@
+/**
+ * @file Scrollspy: which page section is currently being read.
+ */
 import { useEffect, useState } from "react";
 
 /**
@@ -5,6 +8,7 @@ import { useEffect, useState } from "react";
  * One IntersectionObserver watches every section, so there are no scroll listeners.
  */
 export function useActiveSection(ids: readonly string[]) {
+  // `ids` must be a stable array (module constant), or the observer would be rebuilt every render.
   const [active, setActive] = useState(ids[0] ?? "");
 
   useEffect(() => {

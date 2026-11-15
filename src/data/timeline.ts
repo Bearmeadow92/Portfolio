@@ -1,4 +1,9 @@
+/**
+ * @file Milestones shown in the About section timeline, oldest first.
+ */
+
 export interface TimelineEntry {
+  /** Short label for when this happened, such as a year or "Now". */
   period: string;
   title: string;
   org: string;
@@ -11,7 +16,7 @@ export const timeline: TimelineEntry[] = [
     period: "Service",
     title: "United States Marine",
     org: "U.S. Marine Corps",
-    detail: "Leadership, accountability, and mission focus. Learned that preparation beats panic every single time.",
+    detail: "Leadership, accountability, and focus. Learned that preparation beats panic every single time.",
     icon: "🎖️",
   },
   {

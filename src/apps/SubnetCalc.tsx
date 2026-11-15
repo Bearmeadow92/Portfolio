@@ -1,7 +1,12 @@
+/**
+ * @file Subnet Calculator UI.
+ * All math lives in lib/subnet.ts. This file is the UI.
+ */
 import { useMemo, useState } from "react";
 import { calculateSubnet } from "../lib/subnet";
 import { CopyButton } from "../components/CopyButton";
 
+/** One click examples covering private, public, CGNAT, and single host ranges. */
 const PRESETS = ["192.168.1.42/24", "10.0.0.0/8", "172.16.20.5/20", "8.8.8.8/32", "100.64.3.7/10"];
 
 /** IPv4 subnet calculator for network admins, students, and anyone studying for Network+. */
@@ -10,6 +15,7 @@ export default function SubnetCalc() {
   const result = useMemo(() => calculateSubnet(input), [input]);
   const cidr = result?.cidr ?? 24;
 
+  /** Keeps the typed address but swaps in a new prefix length from the slider. */
   const setCidr = (c: number) => setInput(`${input.split("/")[0]}/${c}`);
 
   const rows = result

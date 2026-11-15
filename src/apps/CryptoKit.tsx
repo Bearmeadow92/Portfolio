@@ -1,3 +1,7 @@
+/**
+ * @file Crypto Kit: hashing plus encoders and decoders.
+ * All logic lives in lib/encoding.ts. This file is the UI.
+ */
 import { useEffect, useState } from "react";
 import { codecs, hash, type Codec, type HashAlgo } from "../lib/encoding";
 import { CopyButton } from "../components/CopyButton";
@@ -7,7 +11,7 @@ const ALGOS: HashAlgo[] = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];
 /** A pocket CyberChef: hashing via SubtleCrypto plus common encoders and decoders. */
 export default function CryptoKit() {
   const [tab, setTab] = useState<"hash" | "encode">("hash");
-  const [input, setInput] = useState("Semper Fidelis");
+  const [input, setInput] = useState("Hello, world!");
   const [hashes, setHashes] = useState<Partial<Record<HashAlgo, string>>>({});
   const [codec, setCodec] = useState<Codec>("base64");
   const [mode, setMode] = useState<"encode" | "decode">("encode");
@@ -24,6 +28,7 @@ export default function CryptoKit() {
     };
   }, [input, tab]);
 
+  // Encoding is synchronous and cheap, so it is derived during render instead of stored in state.
   let output = "";
   let error = "";
   if (tab === "encode") {

@@ -1,8 +1,14 @@
+/**
+ * @file Password Lab: strength analyzer and secure generator.
+ * All logic lives in lib/password.ts. This file is the UI.
+ */
 import { useMemo, useState } from "react";
 import { analyzePassword, generatePassword, type CharsetKey } from "../lib/password";
 import { CopyButton } from "../components/CopyButton";
 
+/** Button labels for each character set toggle. */
 const SET_LABELS: Record<CharsetKey, string> = { lower: "a-z", upper: "A-Z", digits: "0-9", symbols: "!@#" };
+/** Strength meter color for each score from 0 to 4. */
 const BAR_COLORS = ["bg-bad", "bg-bad", "bg-warn", "bg-good", "bg-accent"];
 
 /** Password strength analyzer and cryptographically secure generator. Nothing leaves the browser. */
@@ -15,6 +21,7 @@ export default function PasswordLab() {
   // Analysis is O(n) in password length, and memoized so it only reruns when the input changes.
   const report = useMemo(() => analyzePassword(password), [password]);
 
+  /** Adds or removes a character set from the generator options. */
   const toggleSet = (key: CharsetKey) =>
     setSets((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
 

@@ -1,7 +1,14 @@
+/**
+ * @file Interactive terminal UI.
+ *
+ * This component only handles presentation and keyboard input. All command logic
+ * lives in the pure `runCommand` function in commands.ts.
+ */
 import { useEffect, useRef, useState } from "react";
 import { complete, runCommand, type Line, type Tone } from "./commands";
 import { performAction } from "./actions";
 
+/** Tailwind text color for each output tone. */
 const TONE_CLASS: Record<Tone, string> = {
   text: "text-text/90",
   accent: "text-accent",
@@ -16,6 +23,7 @@ const WELCOME: Line[] = [
   { text: "Try: whoami · skills security · play firewall · theme matrix · sudo hire-jesse", tone: "muted" },
 ];
 
+/** One block of scrollback: an optional echoed prompt plus its output lines. */
 interface Entry {
   id: number;
   prompt?: string;
@@ -38,6 +46,7 @@ export function Terminal() {
     if (el) el.scrollTop = el.scrollHeight;
   }, [entries]);
 
+  /** Runs the typed command, records it in history, and applies any side effect. */
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const value = input;
@@ -50,10 +59,12 @@ export function Terminal() {
       setEntries([]);
       return;
     }
+    // Scrollback is capped at 80 entries so memory and render cost stay bounded.
     setEntries((prev) => [...prev.slice(-80), { id: nextId.current++, prompt: value, lines: result.lines }]);
     if (result.action) performAction(result.action);
   };
 
+  /** Shell style shortcuts: arrows for history, Tab to complete, Ctrl + L to clear. */
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "ArrowUp" && history.length) {
       e.preventDefault();

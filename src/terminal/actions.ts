@@ -1,3 +1,6 @@
+/**
+ * @file Side effects for terminal commands and command palette actions.
+ */
 import type { Action } from "./commands";
 import { applyTheme } from "../lib/theme";
 import { openItem } from "../lib/launcher";

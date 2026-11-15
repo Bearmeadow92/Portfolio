@@ -1,3 +1,6 @@
+/**
+ * @file Copy to clipboard button with brief "Copied" feedback.
+ */
 import { useState } from "react";
 
 /** Copies text with the async Clipboard API and shows brief feedback. */

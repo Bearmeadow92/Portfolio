@@ -1,5 +1,13 @@
+/**
+ * @file Consistent numbered heading used at the top of every page section.
+ */
 import { Reveal } from "./Reveal";
 
+/**
+ * @param index  Two digit section number, such as "03".
+ * @param kicker Short lowercase label shown beside the number.
+ * @param title  The heading text.
+ */
 export function SectionHeading({ index, kicker, title, children }: { index: string; kicker: string; title: string; children?: React.ReactNode }) {
   return (
     <Reveal className="mb-10 max-w-2xl">

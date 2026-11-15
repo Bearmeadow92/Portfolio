@@ -1,3 +1,10 @@
+/**
+ * @file Skills shown in the Skills section and the terminal `skills` command.
+ *
+ * Levels are honest self assessments. To add a skill, append to `skills`. The
+ * category index and radar averages below update automatically.
+ */
+
 export type SkillCategory = "Frontend" | "Languages" | "Security" | "Tools";
 
 export interface Skill {
@@ -5,10 +12,11 @@ export interface Skill {
   category: SkillCategory;
   /** Self-assessed proficiency from 0 to 100. */
   level: number;
+  /** One line of evidence or context. */
   note: string;
 }
 
-export const skills: Skill[] = [
+export const skills: readonly Skill[] = [
   { name: "React", category: "Frontend", level: 88, note: "Hooks, context, lazy loading, custom hooks, performance tuning." },
   { name: "TypeScript", category: "Languages", level: 84, note: "Strict mode everywhere. Types are free documentation." },
   { name: "HTML5", category: "Frontend", level: 92, note: "Canvas, dialog, drag and drop, Web Audio, semantic markup." },
@@ -28,4 +36,21 @@ export const skills: Skill[] = [
   { name: "Linux", category: "Tools", level: 79, note: "Bash, permissions, services, and hardening." },
 ];
 
-export const skillCategories: SkillCategory[] = ["Frontend", "Languages", "Security", "Tools"];
+export const skillCategories: readonly SkillCategory[] = ["Frontend", "Languages", "Security", "Tools"];
+
+/**
+ * Skills grouped by category, built once at module load in a single O(n) pass.
+ * Filtering the grid by category is then an O(1) Map lookup instead of an O(n)
+ * `filter` on every click.
+ */
+export const skillsByCategory: ReadonlyMap<SkillCategory, readonly Skill[]> = (() => {
+  const index = new Map<SkillCategory, Skill[]>(skillCategories.map((c) => [c, []]));
+  for (const skill of skills) index.get(skill.category)!.push(skill);
+  return index;
+})();
+
+/** Average level per category for the radar chart. Computed once, never during render. */
+export const categoryAverages: readonly { category: SkillCategory; average: number }[] = skillCategories.map((category) => {
+  const list = skillsByCategory.get(category)!;
+  return { category, average: list.reduce((sum, s) => sum + s.level, 0) / list.length };
+});

@@ -1,3 +1,6 @@
+/**
+ * @file Page footer.
+ */
 import { profile } from "../data/profile";
 
 export function Footer() {
@@ -8,7 +11,7 @@ export function Footer() {
           © {new Date().getFullYear()} {profile.name} · {profile.brand}. Built from scratch with React, TypeScript, Tailwind, and HTML5.
         </p>
         <p className="font-mono text-xs">
-          Semper Fi 🦅 · <span title="↑ ↑ ↓ ↓ ← → ← → B A">psst, try the Konami code</span>
+          <span title="↑ ↑ ↓ ↓ ← → ← → B A">psst, try the Konami code</span>
         </p>
       </div>
     </footer>

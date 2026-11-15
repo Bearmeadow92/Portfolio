@@ -1,3 +1,6 @@
+/**
+ * @file About section: story, quick stats, and a timeline.
+ */
 import { profile } from "../data/profile";
 import { timeline } from "../data/timeline";
 import { Reveal } from "../components/Reveal";
@@ -6,8 +9,8 @@ import { SectionHeading } from "../components/SectionHeading";
 export function About() {
   return (
     <section id="about" className="relative mx-auto max-w-6xl scroll-mt-20 px-4 py-28 sm:px-6">
-      <SectionHeading index="01" kicker="about" title="From the Corps to the codebase">
-        Discipline, curiosity, and a security-first mindset.
+      <SectionHeading index="01" kicker="about" title="Discipline meets curiosity">
+        A security-first engineer who loves building things people enjoy using.
       </SectionHeading>
 
       <div className="grid gap-12 lg:grid-cols-2">

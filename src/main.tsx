@@ -1,3 +1,6 @@
+/**
+ * @file Application entry point. Applies the saved theme, then mounts React.
+ */
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";

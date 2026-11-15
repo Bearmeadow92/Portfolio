@@ -1,9 +1,13 @@
+/**
+ * @file Contact section with a Netlify Forms powered message form.
+ */
 import { useState } from "react";
 import { profile } from "../data/profile";
 import { Reveal } from "../components/Reveal";
 import { SectionHeading } from "../components/SectionHeading";
 import { sfx } from "../lib/sound";
 
+/** The form's field names. They must match the hidden blueprint form in index.html. */
 interface Fields {
   name: string;
   email: string;
@@ -34,11 +38,13 @@ export function Contact() {
   const [botField, setBotField] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
+  /** Curried change handler: updates one field and clears its error as the user types. */
   const update = (key: keyof Fields) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFields((f) => ({ ...f, [key]: e.target.value }));
     if (errors[key]) setErrors((er) => ({ ...er, [key]: undefined }));
   };
 
+  /** Validates, then posts the form to Netlify as URL encoded data. */
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const found = validate(fields);
@@ -61,6 +67,7 @@ export function Contact() {
     }
   };
 
+  /** Renders a labeled text input wired up with validation and ARIA error messaging. */
   const field = (key: keyof Fields, label: string, props: React.InputHTMLAttributes<HTMLInputElement> = {}) => (
     <div>
       <label htmlFor={`c-${key}`} className="mb-1 block text-sm text-muted">{label}</label>

@@ -1,3 +1,6 @@
+/**
+ * @file Hero section: the first screen visitors see.
+ */
 import { profile } from "../data/profile";
 import { ParticleField } from "../components/ParticleField";
 import { Typewriter } from "../components/Typewriter";
@@ -8,7 +11,7 @@ import { openPalette } from "../components/CommandPalette";
 const CODE: [string, string][][] = [
   [["const ", "text-accent-2"], ["engineer", "text-accent"], [" = {", "text-text"]],
   [["  name: ", "text-muted"], [`"${profile.name}"`, "text-good"], [",", "text-text"]],
-  [["  background: ", "text-muted"], ['"USMC"', "text-good"], [",", "text-text"]],
+  [["  focus: ", "text-muted"], ['"fast, secure code"', "text-good"], [",", "text-text"]],
   [["  degree: ", "text-muted"], ['"B.S. Cybersecurity"', "text-good"], [",", "text-text"]],
   [["  stack: ", "text-muted"], ["[", "text-text"], ['"React"', "text-good"], [", ", "text-text"], ['"TS"', "text-good"], [", ", "text-text"], ['"HTML5"', "text-good"], ["],", "text-text"]],
   [["  openToWork: ", "text-muted"], ["true", "text-warn"], [",", "text-text"]],

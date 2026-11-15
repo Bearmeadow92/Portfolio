@@ -1,3 +1,6 @@
+/**
+ * @file Unit tests for password.ts.
+ */
 import { describe, expect, it } from "vitest";
 import { analyzePassword, CHARSETS, generatePassword, poolSize } from "./password";
 

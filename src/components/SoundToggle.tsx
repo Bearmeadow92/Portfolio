@@ -1,5 +1,9 @@
+/**
+ * @file Mute and unmute button for the synthesized sound effects.
+ */
 import { setMuted, sfx, useMuted } from "../lib/sound";
 
+/** Toggles the global mute flag. Plays a click when unmuting, as instant confirmation. */
 export function SoundToggle() {
   const muted = useMuted();
   return (

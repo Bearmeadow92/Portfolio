@@ -1,5 +1,5 @@
 /**
- * IPv4 subnet math with 32-bit unsigned integers.
+ * @file IPv4 subnet math with 32-bit unsigned integers.
  * Every operation is O(1). `>>> 0` forces JavaScript numbers back to unsigned 32-bit.
  */
 
@@ -20,6 +20,7 @@ export interface SubnetInfo {
   binaryMask: string;
 }
 
+/** Parses dotted decimal ("10.0.0.1") into an unsigned 32-bit integer, or null if invalid. */
 export function parseIp(ip: string): number | null {
   const parts = ip.trim().split(".");
   if (parts.length !== 4) return null;
@@ -34,18 +35,25 @@ export function parseIp(ip: string): number | null {
   return value >>> 0;
 }
 
+/** Formats an unsigned 32-bit integer as dotted decimal. */
 export function toIp(n: number): string {
   return [n >>> 24, (n >>> 16) & 255, (n >>> 8) & 255, n & 255].join(".");
 }
 
+/** Formats a 32-bit value as four dot separated binary octets. */
 export function toBinary(n: number): string {
   return (n >>> 0).toString(2).padStart(32, "0").replace(/(.{8})(?!$)/g, "$1.");
 }
 
+/**
+ * Converts a prefix length to a subnet mask.
+ * /0 is special cased because JavaScript shifts are modulo 32, so `x << 32` equals `x << 0`.
+ */
 export function cidrToMask(cidr: number): number {
   return cidr === 0 ? 0 : (0xffffffff << (32 - cidr)) >>> 0;
 }
 
+/** Legacy address class plus the special-purpose range (private, loopback, and so on). */
 function classify(ip: number): { ipClass: string; scope: string } {
   const first = ip >>> 24;
   const ipClass = first < 128 ? "A" : first < 192 ? "B" : first < 224 ? "C" : first < 240 ? "D (multicast)" : "E (reserved)";

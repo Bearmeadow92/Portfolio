@@ -1,5 +1,9 @@
+/**
+ * @file Terminal style boot screen shown on the first visit of a session.
+ */
 import { useEffect, useState } from "react";
 
+/** Boot log lines, revealed one at a time. */
 const LINES = [
   "[ OK ] Initializing NextGenOS kernel v1.0",
   "[ OK ] Mounting /dev/creativity",
@@ -7,7 +11,7 @@ const LINES = [
   "[ OK ] Calibrating HTML5 canvas",
   "[ OK ] Arming firewall",
   "[ OK ] Brewing coffee",
-  "[ OK ] Semper Fi protocol engaged",
+  "[ OK ] Sharpening pixels",
   ">> Welcome. Systems online.",
 ];
 
@@ -19,6 +23,7 @@ export function BootSequence({ onDone }: { onDone: () => void }) {
   const [count, setCount] = useState(0);
   const [leaving, setLeaving] = useState(false);
 
+  // Reveal the next line, or start the fade out once every line is shown.
   useEffect(() => {
     if (count < LINES.length) {
       const id = setTimeout(() => setCount((c) => c + 1), 170);
@@ -28,12 +33,14 @@ export function BootSequence({ onDone }: { onDone: () => void }) {
     return () => clearTimeout(id);
   }, [count]);
 
+  // Wait for the fade out transition before unmounting.
   useEffect(() => {
     if (!leaving) return;
     const id = setTimeout(onDone, 450);
     return () => clearTimeout(id);
   }, [leaving, onDone]);
 
+  // Any key skips the intro.
   useEffect(() => {
     const skip = () => setLeaving(true);
     window.addEventListener("keydown", skip);

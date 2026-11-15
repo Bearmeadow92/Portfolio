@@ -1,16 +1,24 @@
+/**
+ * @file Card for one game or app in the Arcade and Toolkit grids.
+ */
 import type { CatalogItem } from "../data/catalog";
 import { openItem } from "../lib/launcher";
 import { preload } from "./registry";
 import { TiltCard } from "./TiltCard";
 
-/** Reads a saved best score without subscribing, which is fine for a card preview. */
+/**
+ * Reads a saved best score for display on the card.
+ * This is a one-off read during render (not a subscription), which is fine because the
+ * parent section re-renders whenever a game window closes.
+ */
 function readBest(id: string): string | null {
   try {
-    const keys = id === "memory" ? ["ngt:hs:memory-recruit"] : [`ngt:hs:${id}`];
-    const raw = localStorage.getItem(keys[0]!);
-    const val = raw ? (JSON.parse(raw) as number | null) : null;
-    if (val === null) return null;
-    return id === "memory" ? `${val} moves` : val.toLocaleString();
+    // Cipher Memory keeps one record per difficulty. The card shows the entry tier.
+    const key = id === "memory" ? "ngt:hs:memory-junior" : `ngt:hs:${id}`;
+    const raw = localStorage.getItem(key);
+    const value = raw ? (JSON.parse(raw) as number | null) : null;
+    if (value === null) return null;
+    return id === "memory" ? `${value} moves` : value.toLocaleString();
   } catch {
     return null;
   }
@@ -18,6 +26,7 @@ function readBest(id: string): string | null {
 
 export function ItemCard({ item }: { item: CatalogItem }) {
   const best = item.kind === "game" ? readBest(item.id) : null;
+  /** Start downloading the code chunk as soon as the user shows intent, so the click feels instant. */
   const warm = () => preload(item.id);
 
   return (

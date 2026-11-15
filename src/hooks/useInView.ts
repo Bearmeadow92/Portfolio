@@ -1,3 +1,6 @@
+/**
+ * @file Viewport visibility hook built on IntersectionObserver.
+ */
 import { useEffect, useRef, useState } from "react";
 
 /**
@@ -19,7 +22,7 @@ export function useInView<T extends Element>(options: IntersectionObserverInit &
     }, observerOptions);
     observer.observe(el);
     return () => observer.disconnect();
-    // Options are treated as static for the lifetime of the component.
+    // Observer options are read once on mount and treated as static after that.
   }, [once]);
 
   return [ref, inView] as const;

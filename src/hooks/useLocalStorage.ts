@@ -1,3 +1,6 @@
+/**
+ * @file React state that persists to localStorage.
+ */
 import { useCallback, useEffect, useState } from "react";
 
 /**

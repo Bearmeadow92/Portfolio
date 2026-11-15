@@ -1,19 +1,24 @@
 /**
- * Terminal command interpreter.
+ * @file Terminal command interpreter.
  * Pure function: input string in, output lines plus an optional side effect description out.
  * Keeping it free of React and the DOM makes it trivial to unit test.
+ *
+ * Dispatch is an O(1) object lookup by command name, so adding commands never slows
+ * the interpreter down.
  */
 import { profile } from "../data/profile";
 import { skills } from "../data/skills";
-import { catalog, findItem } from "../data/catalog";
+import { catalog, findItem, itemsByKind } from "../data/catalog";
 import { THEMES, THEME_LABELS, isTheme, type ThemeName } from "../lib/theme";
 
+/** Color hint for a line of output. */
 export type Tone = "text" | "accent" | "muted" | "good" | "bad" | "warn";
 export interface Line {
   text: string;
   tone?: Tone;
 }
 
+/** A side effect requested by a command. The UI layer decides how to carry it out. */
 export type Action =
   | { type: "clear" }
   | { type: "navigate"; target: string }
@@ -27,12 +32,16 @@ export interface CommandResult {
 }
 
 export interface CommandContext {
+  /** Previously run commands, oldest first. */
   history: string[];
+  /** Injectable clock, so tests are deterministic. */
   now?: Date;
 }
 
-export const SECTIONS = ["home", "about", "skills", "arcade", "toolkit", "terminal", "github", "contact"] as const;
+/** Section ids that `goto` (and the command palette) can scroll to. */
+export const SECTIONS = ["home", "about", "skills", "arcade", "toolkit", "terminal", "source", "contact"] as const;
 
+/** The pretend filesystem behind `ls` and `cat`. */
 const FILES: Record<string, string[]> = {
   "about.txt": [...profile.about],
   "mission.txt": [
@@ -42,11 +51,14 @@ const FILES: Record<string, string[]> = {
   "secrets.txt": ["Permission denied. Nice try though. Least privilege is a lifestyle. 🔒"],
 };
 
+/** Shorthand for building an output line. */
 const l = (text: string, tone?: Tone): Line => ({ text, tone });
 
 interface Command {
   description: string;
+  /** Shown in `help` instead of the bare name when the command takes arguments. */
   usage?: string;
+  /** Hidden commands work but are left out of `help` and tab completion. */
   hidden?: boolean;
   run: (args: string[], ctx: CommandContext) => CommandResult;
 }
@@ -93,8 +105,8 @@ const commands: Record<string, Command> = {
     run: () => ({
       lines: [
         l(Object.keys(FILES).join("   "), "accent"),
-        l("games/  " + catalog.filter((c) => c.kind === "game").map((c) => c.id).join("  ")),
-        l("apps/   " + catalog.filter((c) => c.kind === "app").map((c) => c.id).join("  ")),
+        l("games/  " + itemsByKind.game.map((c) => c.id).join("  ")),
+        l("apps/   " + itemsByKind.app.map((c) => c.id).join("  ")),
       ],
     }),
   },
@@ -164,7 +176,6 @@ const commands: Record<string, Command> = {
           l("  █▄▄▄▄▄▄▄█    Shell: ngt-sh 1.0", "accent"),
           l(`                Uptime: ${uptime}s`, "accent"),
           l(`                Commands run: ${ctx.history.length}`, "accent"),
-          l("                Branch: U.S. Marine Corps → Software", "accent"),
           l("                Status: Open to work ✅", "good"),
         ],
       };
@@ -212,11 +223,6 @@ const commands: Record<string, Command> = {
     hidden: true,
     run: () => ({ lines: [l("Wake up, Neo...", "good")], action: { type: "matrix" } }),
   },
-  oorah: {
-    description: "Motivation",
-    hidden: true,
-    run: () => ({ lines: [l("OORAH! 🦅 Semper Fidelis. Always faithful, always shipping.", "warn")], action: { type: "theme", value: "marine" } }),
-  },
   coffee: {
     description: "Refuel",
     hidden: true,
@@ -240,8 +246,13 @@ const commands: Record<string, Command> = {
 /** Aliases map familiar commands from other shells onto ours. */
 const ALIASES: Record<string, string> = { cd: "goto", open: "play", dir: "ls", cls: "clear", "?": "help", man: "help" };
 
+/** Visible command names, used for tab completion. */
 export const commandNames = Object.keys(commands).filter((n) => !commands[n]!.hidden);
 
+/**
+ * Parses and runs one line of input.
+ * @returns Output lines and, optionally, a side effect for the UI to perform.
+ */
 export function runCommand(raw: string, ctx: CommandContext): CommandResult {
   const input = raw.trim();
   if (!input) return { lines: [] };

@@ -1,3 +1,6 @@
+/**
+ * @file Unit tests for fuzzy.ts.
+ */
 import { describe, expect, it } from "vitest";
 import { fuzzyScore } from "./fuzzy";
 

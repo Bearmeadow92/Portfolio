@@ -1,3 +1,6 @@
+/**
+ * @file Small site-wide effects: the Matrix rain toggle and smooth section scrolling.
+ */
 import { createStore, useStore } from "./store";
 
 /** Toggles the full screen Matrix rain easter egg. */
@@ -7,7 +10,6 @@ export const useMatrix = () => useStore(matrixStore);
 
 /** Smoothly scrolls to a section by id. */
 export function scrollToSection(id: string) {
-  const target = id === "home" ? document.body : document.getElementById(id);
   if (id === "home") window.scrollTo({ top: 0, behavior: "smooth" });
-  else target?.scrollIntoView({ behavior: "smooth", block: "start" });
+  else document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 }

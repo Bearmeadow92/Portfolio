@@ -1,3 +1,6 @@
+/**
+ * @file Scroll reveal wrapper.
+ */
 import type { ReactNode } from "react";
 import { useInView } from "../hooks/useInView";
 

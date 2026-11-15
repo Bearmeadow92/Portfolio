@@ -1,3 +1,7 @@
+/**
+ * @file Root component. Composes the page sections and mounts the global overlays
+ * (boot screen, game and app launcher, command palette, Matrix rain).
+ */
 import { useCallback, useState } from "react";
 import { Navbar } from "./components/Navbar";
 import { BootSequence } from "./components/BootSequence";
@@ -9,7 +13,7 @@ import { About } from "./sections/About";
 import { Skills } from "./sections/Skills";
 import { Showcase } from "./sections/Showcase";
 import { TerminalSection } from "./sections/TerminalSection";
-import { GitHubFeed } from "./sections/GitHubFeed";
+import { SourceSection } from "./sections/SourceSection";
 import { Contact } from "./sections/Contact";
 import { Footer } from "./sections/Footer";
 import { useKonami } from "./hooks/useKonami";
@@ -50,7 +54,7 @@ export default function App() {
         <Showcase kind="game" />
         <Showcase kind="app" />
         <TerminalSection />
-        <GitHubFeed />
+        <SourceSection />
         <Contact />
       </main>
       <Footer />

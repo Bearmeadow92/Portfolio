@@ -1,5 +1,5 @@
 /**
- * Password analysis and generation.
+ * @file Password analysis and generation.
  * Entropy is estimated as length * log2(poolSize), then penalized for common weaknesses.
  * Generation uses crypto.getRandomValues with rejection sampling, so there is no modulo bias.
  */
@@ -13,17 +13,25 @@ export const CHARSETS = {
 
 export type CharsetKey = keyof typeof CHARSETS;
 
+/** Symbol lookup as a Set, so classifying a character is O(1) instead of scanning a string. */
+const SYMBOL_SET: ReadonlySet<string> = new Set([...CHARSETS.symbols, " "]);
+
+/** A small sample of the most breached passwords. Set membership is O(1). */
 const COMMON = new Set([
   "password", "123456", "12345678", "qwerty", "letmein", "admin", "welcome",
   "iloveyou", "monkey", "dragon", "football", "baseball", "abc123", "111111",
-  "semperfi", "passw0rd", "trustno1", "sunshine", "master", "login",
+  "passw0rd", "letmein1", "trustno1", "sunshine", "master", "login",
 ]);
 
 export interface PasswordReport {
+  /** Estimated entropy in bits, after penalties. */
   entropy: number;
+  /** 0 (very weak) to 4 (excellent). Drives the strength meter. */
   score: 0 | 1 | 2 | 3 | 4;
   label: string;
+  /** Human readable brute force estimate. */
   crackTime: string;
+  /** Actionable tips, most important first. */
   feedback: string[];
 }
 
@@ -34,7 +42,7 @@ export function poolSize(pw: string): number {
     if (ch >= "a" && ch <= "z") lower = true;
     else if (ch >= "A" && ch <= "Z") upper = true;
     else if (ch >= "0" && ch <= "9") digit = true;
-    else if (CHARSETS.symbols.includes(ch) || ch === " ") symbol = true;
+    else if (SYMBOL_SET.has(ch)) symbol = true;
     else other = true;
   }
   return (lower ? 26 : 0) + (upper ? 26 : 0) + (digit ? 10 : 0) + (symbol ? 33 : 0) + (other ? 100 : 0);
@@ -67,6 +75,10 @@ export function formatCrackTime(entropyBits: number): string {
   return "longer than the universe has existed";
 }
 
+/**
+ * Scores a password and explains how to improve it. O(n) in the password length.
+ * Runs entirely in the browser. The password is never stored or sent anywhere.
+ */
 export function analyzePassword(pw: string): PasswordReport {
   const feedback: string[] = [];
   if (!pw) {
@@ -99,7 +111,13 @@ export function analyzePassword(pw: string): PasswordReport {
   return { entropy: Math.round(entropy), score, label, crackTime: formatCrackTime(entropy), feedback };
 }
 
-/** Unbiased random integer in [0, max) using rejection sampling. */
+/**
+ * Unbiased random integer in [0, max) from the cryptographic RNG.
+ *
+ * `random % max` is slightly biased toward small numbers whenever 2^32 is not a
+ * multiple of `max`. Rejection sampling fixes that by discarding the few values that
+ * fall in the uneven tail. Expected iterations: fewer than 2.
+ */
 function secureRandomInt(max: number): number {
   const limit = Math.floor(0x1_0000_0000 / max) * max;
   const buf = new Uint32Array(1);
@@ -111,6 +129,10 @@ function secureRandomInt(max: number): number {
   return x % max;
 }
 
+/**
+ * Generates a random password of `length` characters drawn from the chosen sets,
+ * guaranteeing at least one character from each set. O(n).
+ */
 export function generatePassword(length: number, sets: CharsetKey[]): string {
   const active = sets.length ? sets : (["lower"] as CharsetKey[]);
   const pool = active.map((k) => CHARSETS[k]).join("");

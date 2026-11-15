@@ -1,13 +1,22 @@
-import { useState } from "react";
+/**
+ * @file Mission Board: a Kanban task board.
+ *
+ * Uses the native HTML5 Drag and Drop API (no library), with arrow button fallbacks
+ * so every action also works from the keyboard. Tasks persist in localStorage.
+ */
+import { useMemo, useState } from "react";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 
 type Column = "todo" | "doing" | "done";
 
+type Priority = "low" | "med" | "high";
+
 interface Task {
+  /** Generated with crypto.randomUUID(), so ids never collide. */
   id: string;
   text: string;
   column: Column;
-  priority: "low" | "med" | "high";
+  priority: Priority;
 }
 
 const COLUMNS: { id: Column; title: string; accent: string }[] = [
@@ -16,9 +25,11 @@ const COLUMNS: { id: Column; title: string; accent: string }[] = [
   { id: "done", title: "Shipped", accent: "text-good" },
 ];
 
-const PRIORITY_STYLES = { low: "border-good/50 text-good", med: "border-warn/50 text-warn", high: "border-bad/50 text-bad" };
-const NEXT_PRIORITY = { low: "med", med: "high", high: "low" } as const;
+const PRIORITY_STYLES: Record<Priority, string> = { low: "border-good/50 text-good", med: "border-warn/50 text-warn", high: "border-bad/50 text-bad" };
+/** Clicking a priority tag cycles low, med, high, and back to low. */
+const NEXT_PRIORITY: Record<Priority, Priority> = { low: "med", med: "high", high: "low" };
 
+/** Starter tasks shown on a first visit (and after "Reset board"). */
 const SEED: Task[] = [
   { id: "1", text: "Polish portfolio README", column: "done", priority: "med" },
   { id: "2", text: "Apply to software engineer roles", column: "doing", priority: "high" },
@@ -26,19 +37,26 @@ const SEED: Task[] = [
   { id: "4", text: "Practice data structures and algorithms", column: "todo", priority: "med" },
 ];
 
-/**
- * Kanban board using the native HTML5 Drag and Drop API, with keyboard fallbacks
- * (arrow buttons) so it still works without a mouse. Tasks persist in localStorage.
- */
 export default function KanbanBoard() {
   const [tasks, setTasks, resetTasks] = useLocalStorage<Task[]>("ngt:kanban", SEED);
   const [draft, setDraft] = useState("");
   const [dragOver, setDragOver] = useState<Column | null>(null);
 
+  /**
+   * Group tasks by column in a single O(n) pass. The naive approach filters the whole
+   * list once per column, which is O(columns * n) on every render.
+   */
+  const byColumn = useMemo(() => {
+    const groups: Record<Column, Task[]> = { todo: [], doing: [], done: [] };
+    for (const task of tasks) groups[task.column].push(task);
+    return groups;
+  }, [tasks]);
+
   const move = (id: string, column: Column) => setTasks((ts) => ts.map((t) => (t.id === id ? { ...t, column } : t)));
   const remove = (id: string) => setTasks((ts) => ts.filter((t) => t.id !== id));
   const cyclePriority = (id: string) => setTasks((ts) => ts.map((t) => (t.id === id ? { ...t, priority: NEXT_PRIORITY[t.priority] } : t)));
 
+  /** Adds a task from the form. Input is trimmed and length capped before it is stored. */
   const add = (e: React.FormEvent) => {
     e.preventDefault();
     const text = draft.trim().slice(0, 120);
@@ -47,6 +65,7 @@ export default function KanbanBoard() {
     setDraft("");
   };
 
+  /** Keyboard friendly alternative to dragging: move a task one column left or right. */
   const shift = (task: Task, dir: -1 | 1) => {
     const idx = COLUMNS.findIndex((c) => c.id === task.column) + dir;
     const target = COLUMNS[idx];
@@ -62,7 +81,7 @@ export default function KanbanBoard() {
 
       <div className="grid gap-3 md:grid-cols-3">
         {COLUMNS.map((col) => {
-          const items = tasks.filter((t) => t.column === col.id);
+          const items = byColumn[col.id];
           return (
             <section
               key={col.id}
@@ -74,6 +93,7 @@ export default function KanbanBoard() {
               onDragLeave={() => setDragOver(null)}
               onDrop={(e) => {
                 e.preventDefault();
+                // The dragged task's id travels in the drag event's data payload.
                 const id = e.dataTransfer.getData("text/plain");
                 if (id) move(id, col.id);
                 setDragOver(null);

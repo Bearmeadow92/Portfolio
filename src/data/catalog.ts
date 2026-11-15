@@ -1,7 +1,14 @@
-/** Metadata for every playable game and usable app. Components are mapped in src/components/registry.ts. */
+/**
+ * @file Metadata for every playable game and usable app.
+ *
+ * This file is data only. The React components are mapped to these ids in
+ * `src/components/registry.ts`, which keeps the catalog importable from pure logic
+ * (like the terminal interpreter) without pulling in any UI code.
+ */
 export type ItemKind = "game" | "app";
 
 export interface CatalogItem {
+  /** Stable id used by the launcher, the terminal `play` command, and high score keys. */
   id: string;
   kind: ItemKind;
   title: string;
@@ -11,33 +18,33 @@ export interface CatalogItem {
   highlights: string[];
 }
 
-export const catalog: CatalogItem[] = [
+export const catalog: readonly CatalogItem[] = [
   {
     id: "firewall",
     kind: "game",
     title: "Firewall Defender",
     icon: "🛡️",
-    blurb: "Neutralize malicious packets before they breach your server core. Let legit traffic through.",
-    tech: ["Canvas 2D", "rAF game loop", "Web Audio"],
-    highlights: ["Simulation runs outside React renders", "Difficulty ramps over time", "Touch friendly hitboxes"],
+    blurb: "Defend your server core through waves of threats. Earn upgrades, unmask trojans, and survive the boss.",
+    tech: ["Canvas 2D", "Wave system", "Upgrades"],
+    highlights: ["Simulation runs outside React renders", "O(1) entity removal", "Pooled particles, zero GC"],
   },
   {
     id: "bytebreaker",
     kind: "game",
     title: "Byte Breaker",
     icon: "🧱",
-    blurb: "Squash bugs in production with a brick breaker built from scratch, complete with power ups.",
-    tech: ["Canvas 2D", "Collision physics", "Sub-stepping"],
-    highlights: ["Circle vs rectangle collision", "Anti-tunneling sub-steps", "Procedural level layouts"],
+    blurb: "Squash bugs across eight levels with lasers, fireballs, and explosive chain reactions.",
+    tech: ["Canvas 2D", "Grid collision", "Physics"],
+    highlights: ["O(1) grid collision lookup", "Anti-tunneling sub-steps", "Cached offscreen brick layer"],
   },
   {
     id: "memory",
     kind: "game",
     title: "Cipher Memory",
     icon: "🧠",
-    blurb: "Match pairs of programming symbols. Fewest moves wins. Fully keyboard accessible.",
+    blurb: "Match programming symbols across three tiers. In Staff mode, the cards scramble on you.",
     tech: ["React state", "CSS 3D transforms", "a11y"],
-    highlights: ["Fisher-Yates shuffle", "Accessible button cards", "Per-difficulty high scores"],
+    highlights: ["Fisher-Yates shuffle", "Fully keyboard accessible", "Pure, unit tested rules"],
   },
   {
     id: "password",
@@ -71,10 +78,20 @@ export const catalog: CatalogItem[] = [
     kind: "app",
     title: "Mission Board",
     icon: "📋",
-    blurb: "A drag and drop Kanban board that saves to your browser. Plan the mission, ship the mission.",
+    blurb: "A drag and drop Kanban board that saves to your browser. Plan the work, ship the work.",
     tech: ["HTML5 Drag & Drop", "localStorage", "Custom hooks"],
     highlights: ["Keyboard fallback controls", "Persists between visits", "Priority tags"],
   },
 ];
 
-export const findItem = (id: string) => catalog.find((c) => c.id === id);
+/** Id to item index, built once so lookups are O(1) instead of an O(n) scan. */
+const catalogIndex: ReadonlyMap<string, CatalogItem> = new Map(catalog.map((item) => [item.id, item]));
+
+/** Looks up a game or app by id. O(1). */
+export const findItem = (id: string) => catalogIndex.get(id);
+
+/** Items of one kind, precomputed so section renders do no filtering. */
+export const itemsByKind: Record<ItemKind, readonly CatalogItem[]> = {
+  game: catalog.filter((c) => c.kind === "game"),
+  app: catalog.filter((c) => c.kind === "app"),
+};
