@@ -1,0 +1,288 @@
+@import "tailwindcss";
+
+/*
+  Design tokens.
+  Every theme only redefines these variables, so components never hardcode colors.
+  Tailwind utilities like `bg-accent/20` are wired to them in the @theme block below.
+*/
+:root,
+[data-theme="cyber"] {
+  --bg: #05070d;
+  --surface: #0b1020;
+  --surface-2: #111830;
+  --border: #1e2a4a;
+  --text: #e6edf7;
+  --muted: #8b98b8;
+  --accent: #22d3ee;
+  --accent-2: #a855f7;
+  --good: #4ade80;
+  --bad: #f87171;
+  --warn: #fbbf24;
+}
+
+[data-theme="matrix"] {
+  --bg: #020803;
+  --surface: #06140a;
+  --surface-2: #0a1f10;
+  --border: #12391d;
+  --text: #d9ffe3;
+  --muted: #7fb08d;
+  --accent: #39ff6a;
+  --accent-2: #b4ff39;
+  --good: #39ff6a;
+  --bad: #ff5f5f;
+  --warn: #e5ff39;
+}
+
+[data-theme="sunset"] {
+  --bg: #0d0610;
+  --surface: #1a0d1f;
+  --surface-2: #24112b;
+  --border: #3d1d47;
+  --text: #fdeef7;
+  --muted: #c09ab3;
+  --accent: #fb923c;
+  --accent-2: #ec4899;
+  --good: #4ade80;
+  --bad: #f87171;
+  --warn: #facc15;
+}
+
+/* Semper Fi: scarlet and gold. */
+[data-theme="marine"] {
+  --bg: #0b0606;
+  --surface: #170c0c;
+  --surface-2: #211111;
+  --border: #3d1a1a;
+  --text: #fbf3e6;
+  --muted: #bfa58a;
+  --accent: #fcc419;
+  --accent-2: #e03131;
+  --good: #69db7c;
+  --bad: #ff6b6b;
+  --warn: #fcc419;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --color-good: var(--good);
+  --color-bad: var(--bad);
+  --color-warn: var(--warn);
+  --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    color-scheme: dark;
+  }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    transition: background-color 0.4s ease, color 0.4s ease;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--accent) 35%, transparent);
+  }
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+  /* Themed scrollbar. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+}
+
+@layer components {
+  /* Glassy card used across the site. */
+  .panel {
+    background: color-mix(in srgb, var(--surface) 82%, transparent);
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    backdrop-filter: blur(10px);
+  }
+  .panel-hover {
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+  .panel-hover:hover {
+    transform: translateY(-4px);
+    border-color: color-mix(in srgb, var(--accent) 60%, var(--border));
+    box-shadow: 0 12px 40px -12px color-mix(in srgb, var(--accent) 45%, transparent);
+  }
+  .text-gradient {
+    background: linear-gradient(100deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.2rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    transition: transform 0.15s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    cursor: pointer;
+  }
+  .btn:active {
+    transform: scale(0.97);
+  }
+  .btn-primary {
+    background: linear-gradient(100deg, var(--accent), var(--accent-2));
+    color: var(--bg);
+    box-shadow: 0 0 24px -6px var(--accent);
+  }
+  .btn-primary:hover {
+    box-shadow: 0 0 36px -4px var(--accent);
+  }
+  .btn-ghost {
+    border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--surface-2) 70%, transparent);
+    color: var(--text);
+  }
+  .btn-ghost:hover {
+    border-color: var(--accent);
+  }
+  .input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 0.6rem;
+    padding: 0.55rem 0.8rem;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    transition: border-color 0.2s ease;
+  }
+  .input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+  /* Subtle animated grid behind sections. */
+  .grid-bg {
+    background-image:
+      linear-gradient(color-mix(in srgb, var(--border) 45%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in srgb, var(--border) 45%, transparent) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+  }
+}
+
+/* Scroll reveal, toggled by the <Reveal> component via IntersectionObserver. */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+.caret::after {
+  content: "▋";
+  margin-left: 2px;
+  color: var(--accent);
+  animation: blink 1s steps(1) infinite;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes glitch {
+  0%,
+  100% {
+    text-shadow: none;
+    transform: none;
+  }
+  20% {
+    text-shadow: -2px 0 var(--accent-2), 2px 0 var(--accent);
+    transform: translate(1px, -1px);
+  }
+  40% {
+    text-shadow: 2px 0 var(--accent-2), -2px 0 var(--accent);
+    transform: translate(-1px, 1px);
+  }
+  60% {
+    text-shadow: none;
+    transform: none;
+  }
+}
+.glitch:hover {
+  animation: glitch 0.45s linear;
+}
+
+@keyframes scan {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(100vh);
+  }
+}
+
+/* Native <dialog> styling for game and app windows. */
+dialog::backdrop {
+  background: color-mix(in srgb, var(--bg) 75%, transparent);
+  backdrop-filter: blur(6px);
+}
+
+/* Respect users who prefer less motion. Accessibility is a feature. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
