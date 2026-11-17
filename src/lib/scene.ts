@@ -9,10 +9,10 @@
 import { createStore, useStore } from "./store";
 
 export const SCENES = [
-  { id: "contour", name: "Contour", blurb: "Topographic lines that rise under your cursor." },
-  { id: "halftone", name: "Halftone", blurb: "A field of dots that swell as you pass." },
-  { id: "ripple", name: "Ripple", blurb: "Rings spread from your cursor and interfere." },
-  { id: "signal", name: "Signal", blurb: "Ridgelines of noise that bend toward you." },
+  { id: "breach", name: "Breach", blurb: "A live attack map. Your cursor is the sensor. Click to fire a probe." },
+  { id: "glyph", name: "Glyph", blurb: "A 3D sculpture rendered entirely in text, lit from your cursor." },
+  { id: "drivetrain", name: "Drivetrain", blurb: "Gears and a piston in linework. Sweep across the screen to turn the crank." },
+  { id: "chrome", name: "Chrome", blurb: "Liquid metal, raymarched live. Your cursor orbits the camera." },
 ] as const;
 
 export type SceneId = (typeof SCENES)[number]["id"];
@@ -33,14 +33,14 @@ function initialScene(): SceneId {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved && isScene(saved)) return saved;
-    if (window.matchMedia("(prefers-color-scheme: light)").matches) return "contour";
+    if (window.matchMedia("(prefers-color-scheme: light)").matches) return "glyph";
   } catch {
     /* Storage or matchMedia unavailable. Use the default. */
   }
-  return "ripple";
+  return "breach";
 }
 
-const sceneStore = createStore<SceneId>(typeof window === "undefined" ? "ripple" : initialScene());
+const sceneStore = createStore<SceneId>(typeof window === "undefined" ? "breach" : initialScene());
 
 /** Switches the scene, saves the choice, and notifies subscribers. O(1). */
 export function applyScene(scene: SceneId) {

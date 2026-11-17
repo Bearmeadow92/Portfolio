@@ -19,8 +19,8 @@ describe("runCommand", () => {
 
   it("returns side effect actions", () => {
     expect(runCommand("play firewall", ctx).action).toEqual({ type: "open", id: "firewall" });
-    expect(runCommand("scene ripple", ctx).action).toEqual({ type: "scene", value: "ripple" });
-    expect(runCommand("theme halftone", ctx).action).toEqual({ type: "scene", value: "halftone" }); // Alias.
+    expect(runCommand("scene breach", ctx).action).toEqual({ type: "scene", value: "breach" });
+    expect(runCommand("theme chrome", ctx).action).toEqual({ type: "scene", value: "chrome" }); // Alias.
     expect(runCommand("cd contact", ctx).action).toEqual({ type: "navigate", target: "contact" });
     expect(runCommand("clear", ctx).action).toEqual({ type: "clear" });
   });
@@ -39,6 +39,6 @@ describe("complete", () => {
   it("completes command names and arguments", () => {
     expect(complete("who")).toEqual(["whoami"]);
     expect(complete("play fire")).toEqual(["play firewall"]);
-    expect(complete("scene si")).toEqual(["scene signal"]);
+    expect(complete("scene dr")).toEqual(["scene drivetrain"]);
   });
 });
