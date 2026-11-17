@@ -20,7 +20,7 @@ const TONE_CLASS: Record<Tone, string> = {
 
 const WELCOME: Line[] = [
   { text: "NextGenOS ngt-sh 1.0  (type 'help' to get started)", tone: "accent" },
-  { text: "Try: whoami · skills security · play firewall · scene halftone · sudo hire-jesse", tone: "muted" },
+  { text: "Try: whoami · skills security · play firewall · scene chrome · sudo hire-jesse", tone: "muted" },
 ];
 
 /** One block of scrollback: an optional echoed prompt plus its output lines. */

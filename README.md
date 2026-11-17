@@ -8,14 +8,14 @@ The page itself is almost empty: large type, hairlines, and space. All of the co
 
 ### The backdrop (WebGL2 + GLSL)
 
-Four switchable scenes, each a small fragment shader running on the GPU. Each scene brings its own palette, which re-tints the whole site.
+Four switchable scenes, each a fragment shader written from scratch. Each scene brings its own palette, which re-tints the whole site.
 
 | Scene | What it is |
 | --- | --- |
-| **Contour** | Topographic lines of a drifting height field. A hill rises under your cursor. |
-| **Halftone** | A grid of dots whose size follows a slow wave and swells as you pass. |
-| **Ripple** | Rings spreading from your cursor and two wandering sources, drawn where the waves cancel. |
-| **Signal** | Ridgelines of noise that bend toward you. |
+| **Breach** | A live attack map. Packets stream across a node graph, hostile traffic flares red, and your cursor is a sensor that locks onto threats in range. Click to fire a probe. |
+| **Glyph** | A raymarched 3D sculpture rendered entirely in text characters, drawn from a 5×7 bitmap font packed into integers. The light follows your cursor. |
+| **Drivetrain** | Meshing gears, a crankshaft, and a piston in blueprint linework. The gear ratios are exact, and sweeping your cursor across the screen turns the crank. |
+| **Chrome** | A liquid metal sculpture, raymarched in real time and lit by a procedural studio. Your cursor orbits the camera. |
 
 ### Tools (all client side, nothing leaves your browser)
 
@@ -43,7 +43,7 @@ Four switchable scenes, each a small fragment shader running on the GPU. Each sc
 - **Liquid, magnetic buttons**: the hover color grows from the exact point your pointer enters, and the button leans toward the cursor.
 - **Index rows** instead of cards: each project is one line that inverts on hover.
 - **A cursor ring** that trails the mouse and grows over anything clickable.
-- **A working terminal** with history, tab completion, and commands that drive the site (`help`, `play firewall`, `scene halftone`, `sudo hire-jesse`).
+- **A working terminal** with history, tab completion, and commands that drive the site (`help`, `play firewall`, `scene chrome`, `sudo hire-jesse`).
 - **A command palette** (`Ctrl + K` / `Cmd + K`) with fuzzy search.
 - **A live source section** showing this repo's language breakdown and latest commits from the GitHub REST API.
 - **A Netlify Forms** contact form with validation and a spam honeypot.

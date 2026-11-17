@@ -47,8 +47,15 @@ There is no state library. Three patterns cover everything:
 
 `src/art` draws the animated background as a full-screen WebGL2 fragment shader.
 
-- **Scenes** are fragment shaders in `shaders.ts`. They share a small noise library and a
-  fixed set of uniforms (time, pointer position, art intensity, a pulse, and three colors).
+- **Scenes** are fragment shaders in `shaders.ts`. They share a few helpers (hashing,
+  rotation, segment distance, smooth minimum) and a fixed set of uniforms (time, pointer
+  position, art intensity, a pulse, a clear zone, and three colors).
+  - *Breach* checks only the 3x3 neighborhood of grid cells per pixel, so its cost is
+    constant however large the node graph is.
+  - *Glyph* raymarches once per character cell and draws glyphs from a 5x7 bitmap font
+    stored as integers (split in two, since 35 bits do not fit in a 32-bit int).
+  - *Drivetrain* is pure 2D distance fields with exact gear ratios, so it is cheap.
+  - *Chrome* is a raymarched signed distance field with a procedural studio reflection.
 - **The engine** (`Backdrop.tsx`) compiles a scene's program the first time it is shown and
   caches it. Each frame uploads eight uniforms and draws one triangle. Nothing is allocated.
 - **Color** comes from CSS. Each scene's palette is a block of CSS variables in `index.css`.

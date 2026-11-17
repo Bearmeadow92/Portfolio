@@ -26,59 +26,63 @@
   single source of truth for color.
 */
 :root,
-[data-scene="contour"] {
-  --bg: #f3f0e9;
-  --surface: #faf8f3;
-  --surface-2: #e8e4da;
-  --border: #d2cec3;
-  --text: #171713;
-  --muted: #625f56;
-  --accent: #c8340f;
-  --good: #1c7a3e;
-  --bad: #c8340f;
-  --warn: #8f5500;
-  color-scheme: light;
-}
-
-[data-scene="halftone"] {
-  --bg: #0b0b0c;
-  --surface: #141416;
-  --surface-2: #1e1e21;
-  --border: #2e2e32;
-  --text: #f1efe9;
-  --muted: #a09e96;
-  --accent: #c8ff3e;
+[data-scene="breach"] {
+  /* Dark and cinematic: ice white traffic, alarm red threats. */
+  --bg: #06080b;
+  --surface: #0c1015;
+  --surface-2: #131920;
+  --border: #222a33;
+  --text: #dfe7ec;
+  --muted: #8b98a2;
+  --accent: #ff4433;
   --good: #5fdc8f;
-  --bad: #ff6a4d;
+  --bad: #ff4433;
   --warn: #f0b24a;
   color-scheme: dark;
 }
 
-[data-scene="ripple"] {
-  --bg: #111012;
-  --surface: #19181b;
-  --surface-2: #242327;
-  --border: #353338;
-  --text: #f1ece2;
-  --muted: #a5a199;
-  --accent: #e9b44c;
-  --good: #6fe09a;
-  --bad: #ff7a5c;
-  --warn: #e9b44c;
-  color-scheme: dark;
+[data-scene="glyph"] {
+  /* Stark: paper, ink, and one red-orange accent. */
+  --bg: #ecebe6;
+  --surface: #f6f5f1;
+  --surface-2: #e1dfd8;
+  --border: #cfccc3;
+  --text: #121211;
+  --muted: #5d5b55;
+  --accent: #c43305;
+  --good: #1c7a3e;
+  --bad: #c43305;
+  --warn: #8f5500;
+  color-scheme: light;
 }
 
-[data-scene="signal"] {
-  --bg: #1b32d6;
-  --surface: #2038dd;
-  --surface-2: #162abc;
-  --border: #5165ec;
-  --text: #ffffff;
-  --muted: #c9d0ff;
-  --accent: #ffe14a;
-  --good: #a6ffc4;
-  --bad: #ffc2b3;
-  --warn: #ffe14a;
+[data-scene="drivetrain"] {
+  /* Bold: caution yellow, black linework, signal red. */
+  --bg: #ffd21f;
+  --surface: #ffdb4d;
+  --surface-2: #f2c400;
+  --border: #c9a50a;
+  --text: #15120a;
+  --muted: #4f4520;
+  --accent: #b31d00;
+  --good: #14632f;
+  --bad: #b31d00;
+  --warn: #6b4a00;
+  color-scheme: light;
+}
+
+[data-scene="chrome"] {
+  /* Cinematic: deep black, chrome, and a violet rim light. */
+  --bg: #050506;
+  --surface: #0d0d10;
+  --surface-2: #16161a;
+  --border: #29292f;
+  --text: #ecebf0;
+  --muted: #8e8c96;
+  --accent: #a58bff;
+  --good: #6fe09a;
+  --bad: #ff7a5c;
+  --warn: #f0b24a;
   color-scheme: dark;
 }
 
