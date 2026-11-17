@@ -22,6 +22,7 @@ import { useEffect, useRef } from "react";
 export interface Palette {
   bg: string;
   surface: string;
+  surface2: string;
   border: string;
   text: string;
   muted: string;
@@ -45,6 +46,7 @@ export function readPalette(): Palette {
   return {
     bg: v("--bg"),
     surface: v("--surface"),
+    surface2: v("--surface-2") || v("--surface"),
     border: v("--border"),
     text: v("--text"),
     muted: v("--muted"),
