@@ -12,7 +12,7 @@ Four switchable scenes, each a fragment shader written from scratch. Each scene 
 
 | Scene | What it is |
 | --- | --- |
-| **Breach** | A quiet network that comes under attack every ten seconds. An attack beam strikes a node, infection spreads red through the graph, a firewall ring snaps up to contain it, and the network heals. |
+| **Breach** | A 3D network laid out on a floor in perspective, gliding toward the camera. Every nine seconds an attack lands: a lock-on ring, a strike arcing out of the sky, a shockwave, red infection racing along the links, and a firewall curtain rising to contain it. Your cursor is a sensor, and clicking fires a probe. |
 | **Glyph** | A spinning donut drawn in text characters with the classic `.,-~:;=!*#$@` ramp, in the spirit of Andy Sloane's donut.c. Each character cell raymarches the torus, and glyphs come from a 5×7 bitmap font packed into integers. |
 | **Drivetrain** | A 60° V-twin in blueprint linework: two pistons on one crank pin, valves on a half-speed cam, spark plugs and head bolts, a timing belt, and a flywheel meshing an accessory gear. Moving fast or scrolling revs it, and the spokes motion blur at high RPM. |
 | **Chrome** | A machined hex bolt, nut, and washer in polished chrome, with a thread runout and a chamfered tip. Sweeping your cursor across screws the nut along the thread, and a click spins it. The rim light slowly cycles through colors. |

@@ -50,9 +50,13 @@ There is no state library. Three patterns cover everything:
 - **Scenes** are fragment shaders in `shaders.ts`. They share a few helpers (hashing,
   rotation, segment distance, smooth minimum) and a fixed set of uniforms (time, pointer
   position, art intensity, a pulse, a clear zone, and three colors).
-  - *Breach* checks only the 3x3 neighborhood of grid cells per pixel, so its cost is
-    constant however large the node graph is. Each incident's position and timing come
-    from hashing the incident number, so the shader stays stateless.
+  - *Breach* intersects each pixel's ray with a floor plane and draws the network in
+    floor coordinates, checking only the 3x3 nearby grid cells, so its cost is constant.
+    fwidth() keeps lines one pixel wide at any distance, and a level-of-detail fade hides
+    the network before distant lines can alias into grain. The firewall is an analytic
+    ray-cylinder intersection, and the attack arc is a projected 3D curve. Incident
+    targets are picked in screen space, then traced to the floor, so they always land
+    in the open space beside the hero copy.
   - *Glyph* raymarches once per character cell and draws glyphs from a 5x7 bitmap font
     stored as integers (split in two, since 35 bits do not fit in a 32-bit int).
   - *Drivetrain* is pure 2D distance fields (a slider crank solved per cylinder), so it
