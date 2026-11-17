@@ -19,8 +19,8 @@ export function Skills() {
   return (
     <section id="skills" className="scroll-mt-20 py-28">
       <div className="mx-auto max-w-[1400px] px-5 sm:px-10">
-        <SectionHeading index="03" label="Skills" title="What I work with.">
-          Honest numbers. The lower ones are the ones I am actively working on.
+        <SectionHeading index="03" label="Skills" title="What's in my toolbox.">
+          Honest numbers. The lower ones are what I'm leveling up right now, and I'm always happy to talk about how.
         </SectionHeading>
 
         <div ref={barsRef} className="grid gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">

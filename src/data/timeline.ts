@@ -10,8 +10,8 @@ export interface TimelineEntry {
 }
 
 export const timeline: readonly TimelineEntry[] = [
-  { period: "Service", title: "United States Marine", org: "U.S. Marine Corps" },
-  { period: "Transition", title: "Home lab, self taught", org: "Built it, broke it, fixed it" },
+  { period: "Before", title: "U.S. Marine Corps", org: "Where the discipline started" },
+  { period: "The grind", title: "Home lab, self taught", org: "One broken server at a time" },
   { period: "May 2026", title: "B.S. Cybersecurity", org: "Southern New Hampshire University" },
-  { period: "Now", title: "Software engineer", org: "Open to work" },
+  { period: "Now", title: "Software engineer", org: "Open to software, security, and full stack roles" },
 ];

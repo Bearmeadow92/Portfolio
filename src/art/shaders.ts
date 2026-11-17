@@ -84,7 +84,7 @@ float smin(float a, float b, float k) {
 float presence() {
   float x = gl_FragCoord.x / u_res.x;
   float portrait = step(u_res.x, u_res.y);
-  float side = mix(1.0 - 0.72 * (1.0 - smoothstep(0.28, 0.82, x)), 0.5, portrait);
+  float side = mix(1.0 - 0.72 * (1.0 - smoothstep(0.28, 0.82, x)), 0.32, portrait);
   return u_dim * mix(1.0, side, u_clear);
 }
 
@@ -96,7 +96,7 @@ vec2 toUv(vec2 frag) {
 // Where the art's focal object sits: right of center on wide screens (the hero copy is on
 // the left), and lower center on portrait screens.
 vec2 focus() {
-  return u_res.x > u_res.y ? vec2(0.4 * u_res.x / u_res.y - 0.18, 0.0) : vec2(0.0, -0.18);
+  return u_res.x > u_res.y ? vec2(0.42 * u_res.x / u_res.y - 0.15, 0.0) : vec2(0.0, -0.3);
 }
 
 // One-pixel anti-aliased line from a distance value.
@@ -211,10 +211,11 @@ void main() {
   float probe = u_pulse * stroke(length(q - m) - (1.0 - u_pulse) * 1.1, px * 2.0);
 
   vec3 color = u_bg;
-  color = mix(color, u_ink, links * 0.11 * pres);
+  color = mix(color, u_ink, links * 0.085 * pres);
   color = mix(color, u_ink, nodes * 0.4 * pres);
-  color = mix(color, u_ink, packets * 0.5 * pres);
-  float hot = max(pres, 0.45);
+  color = mix(color, u_ink, packets * 0.45 * pres);
+  // Incidents stay vivid in the hero, then calm down behind body text like everything else.
+  float hot = max(pres, 0.45 * u_clear);
   color = mix(color, u_accent, redLinks * 0.85 * hot);
   color = mix(color, u_accent, redNodes * hot);
   color = mix(color, u_accent, (beam + flash) * hot);
@@ -265,7 +266,7 @@ float sdTorus(vec3 p) {
 
 void main() {
   float pres = presence();
-  float cellH = max(13.0, floor(u_res.y / 46.0));
+  float cellH = max(11.0, floor(u_res.y / 58.0));
   float cellW = floor(cellH * 0.62);
   vec2 cellId = floor(gl_FragCoord.xy / vec2(cellW, cellH));
   vec2 local = fract(gl_FragCoord.xy / vec2(cellW, cellH));
@@ -274,7 +275,8 @@ void main() {
   // Raymarch the torus from this cell's center. Every pixel in a cell shares one sample.
   mat3 r = tumble();
   mat3 inv = transpose(r);
-  vec2 uv = toUv(center) - focus();
+  // On portrait screens the donut shrinks so it fits under the text instead of behind it.
+  vec2 uv = (toUv(center) - focus()) * mix(1.0, 1.8, step(u_res.x, u_res.y));
   vec3 ro = inv * vec3(0.0, 0.0, -7.2);
   vec3 rd = inv * normalize(vec3(uv, 1.55));
   float dist = 0.0;
@@ -299,8 +301,8 @@ void main() {
     // Map lighting to the ramp the way donut.c does: surfaces facing away from the light
     // get the dimmest glyph (so the silhouette still reads), lit ones climb the ramp.
     lum = diffuse <= 0.0 ? 0.09 : 0.16 + 0.84 * diffuse;
-  } else if (hash(cellId) < 0.03) {
-    lum = 0.085; // A sparse field of dots in the empty space.
+    // Depth shading: the far side of the ring recedes, which sells the 3D form.
+    lum *= mix(1.0, 0.72, smoothstep(6.4, 8.0, dist));
   }
 
   // A click scrambles a ring of glyphs spreading outward.
@@ -394,7 +396,7 @@ void main() {
     float walls = min(abs(abs(c.x) - 0.07), 1.0) + max(max(boreBottom - c.y, c.y - boreTop), 0.0);
     lines = max(lines, stroke(walls, px));
     // Cooling fins on the outside of the barrel.
-    float fins = stroke(fract((c.y - boreBottom) / 0.025) * 0.025 - 0.0125, px) * step(boreBottom, c.y) * step(c.y, boreTop - 0.02) * step(0.07, abs(c.x)) * step(abs(c.x), 0.1);
+    float fins = stroke(fract((c.y - boreBottom) / 0.04) * 0.04 - 0.02, px) * step(boreBottom, c.y) * step(c.y, boreTop - 0.02) * step(0.07, abs(c.x)) * step(abs(c.x), 0.1);
     lines = max(lines, fins * 0.6);
     // Piston, wrist pin, and connecting rod.
     float pistonY = s + 0.03;
@@ -403,8 +405,15 @@ void main() {
     hot = max(hot, stroke(sdSegment(uv, pin, wrist), px * 1.6));
     hot = max(hot, stroke(length(uv - wrist) - 0.01, px));
 
-    // Cylinder head, and two valves opened by a half speed cam (one cycle per two turns).
+    // Cylinder head with four head bolts, and a spark plug on top.
     lines = max(lines, stroke(boxOutline(c - vec2(0.0, boreTop + 0.04), vec2(0.11, 0.04)), px));
+    for (int hb = 0; hb < 2; hb++) {
+      float hx = hb == 0 ? -0.088 : 0.088;
+      lines = max(lines, stroke(length(c - vec2(hx, boreTop + 0.04)) - 0.008, px));
+    }
+    lines = max(lines, stroke(boxOutline(c - vec2(0.0, boreTop + 0.1), vec2(0.012, 0.02)), px));
+    lines = max(lines, stroke(sdSegment(c, vec2(0.0, boreTop + 0.12), vec2(0.0, boreTop + 0.145)), px));
+    // Valves opened by a half speed cam (one cycle per two crank turns).
     for (int v = 0; v < 2; v++) {
       float vs = v == 0 ? -1.0 : 1.0;
       float cam = angle * 0.5 + side * 0.9 + vs * 1.9;
@@ -505,8 +514,12 @@ float scene(vec3 p) {
   vec3 hp = p - vec3(0.0, 0.78, 0.0);
   float head = chamferedHex(hp, 0.38, 0.13);
   float theta = atan(p.z, p.x);
-  float thread = 0.012 * sin(p.y * 2.0 * PI / PITCH + theta);
+  // The thread runs out just under the head, leaving a smooth neck like a real bolt.
+  float threaded = smoothstep(0.52, 0.44, p.y);
+  float thread = 0.012 * sin(p.y * 2.0 * PI / PITCH + theta) * threaded;
   float shaft = max(length(p.xz) - 0.2 + thread, abs(p.y + 0.18) - 0.85);
+  // Chamfer the tip with a cone so the end of the bolt reads as machined.
+  shaft = max(shaft, (length(p.xz) - (p.y + 1.03) * 1.2 - 0.13) * 0.7);
   float bolt = min(head, shaft);
 
   // The nut: a chamfered hex with a bore, turned to match its height on the thread.
@@ -514,7 +527,10 @@ float scene(vec3 p) {
   vec3 np = p - vec3(0.0, y, 0.0);
   np.xz = rot(y * 2.0 * PI / PITCH + u_pulse * 6.0) * np.xz;
   float nut = max(chamferedHex(np, 0.34, 0.15), -(length(np.xz) - 0.215));
-  return min(bolt, nut);
+  // A flat washer riding just under the nut.
+  vec3 wp = p - vec3(0.0, y - 0.175, 0.0);
+  float washer = max(abs(length(wp.xz) - 0.3) - 0.085, abs(wp.y) - 0.018);
+  return min(min(bolt, nut), washer);
 }
 
 vec3 normalAt(vec3 p) {

@@ -76,8 +76,8 @@ export function Work() {
 
   return (
     <section id="work" className="mx-auto max-w-[1400px] scroll-mt-20 px-5 py-28 sm:px-10">
-      <SectionHeading index="01" label="Work" title="Use it. Play it.">
-        Four tools and three games. Open any of them right here.
+      <SectionHeading index="01" label="Work" title="Made to be used.">
+        Four tools and three games, all handmade. Open any of them right here, no install needed.
       </SectionHeading>
 
       {GROUPS.map((group) => (

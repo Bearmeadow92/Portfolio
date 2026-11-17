@@ -14,8 +14,8 @@ Four switchable scenes, each a fragment shader written from scratch. Each scene 
 | --- | --- |
 | **Breach** | A quiet network that comes under attack every ten seconds. An attack beam strikes a node, infection spreads red through the graph, a firewall ring snaps up to contain it, and the network heals. |
 | **Glyph** | A spinning donut drawn in text characters with the classic `.,-~:;=!*#$@` ramp, in the spirit of Andy Sloane's donut.c. Each character cell raymarches the torus, and glyphs come from a 5×7 bitmap font packed into integers. |
-| **Drivetrain** | A 60° V-twin in blueprint linework: two pistons on one crank pin, valves on a half-speed cam, a timing belt, and a flywheel meshing an accessory gear. Moving fast or scrolling revs it, and the spokes motion blur at high RPM. |
-| **Chrome** | A machined hex bolt and nut in polished chrome. Sweeping your cursor across screws the nut along the thread, and a click spins it. The rim light slowly cycles through colors. |
+| **Drivetrain** | A 60° V-twin in blueprint linework: two pistons on one crank pin, valves on a half-speed cam, spark plugs and head bolts, a timing belt, and a flywheel meshing an accessory gear. Moving fast or scrolling revs it, and the spokes motion blur at high RPM. |
+| **Chrome** | A machined hex bolt, nut, and washer in polished chrome, with a thread runout and a chamfered tip. Sweeping your cursor across screws the nut along the thread, and a click spins it. The rim light slowly cycles through colors. |
 
 ### Tools (all client side, nothing leaves your browser)
 

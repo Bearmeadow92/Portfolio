@@ -37,7 +37,7 @@ import { FRAGMENT_SHADERS, VERTEX_SHADER } from "./shaders";
 const QUALITY_STEPS = [1, 0.75, 0.6] as const;
 /** Average frame time (ms) above which quality drops one step. */
 const SLOW_FRAME_MS = 26;
-const MAX_PIXEL_RATIO = 1.5;
+const MAX_PIXEL_RATIO = 2;
 /** Seconds without pointer movement before the focal point starts drifting on its own. */
 const IDLE_AFTER = 3;
 
@@ -144,6 +144,7 @@ export function Backdrop() {
     let height = 0;
     let raf = 0;
     let last = performance.now();
+    let smoothDt = 1 / 60;
     let time = reduced ? 12 : 0; // A pleasant still frame when motion is disabled.
     let pulseLevel = 0;
     let dim = 1;
@@ -252,7 +253,10 @@ export function Backdrop() {
     const frame = (now: number) => {
       const elapsed = now - last;
       last = now;
-      const dt = Math.min(elapsed / 1000, 0.05);
+      // Smoothed frame time: one late frame (a GC pause, a busy tab) is averaged out
+      // instead of making every moving part jump forward at once.
+      smoothDt += (Math.min(elapsed / 1000, 0.05) - smoothDt) * 0.2;
+      const dt = smoothDt;
       time += dt;
       draw(dt);
 

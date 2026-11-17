@@ -40,8 +40,8 @@ export function SourceSection() {
 
   return (
     <section id="source" className="mx-auto max-w-[1400px] scroll-mt-20 px-5 py-28 sm:px-10">
-      <SectionHeading index="05" label="Source" title="Read the code.">
-        The whole site is open source. The numbers below come live from the GitHub API.
+      <SectionHeading index="05" label="Source" title="Everything here is open.">
+        Read it, learn from it, borrow from it. That is what it's for. The numbers below come live from GitHub.
       </SectionHeading>
 
       {/* min-w-0 lets grid items shrink below their content width, so long commit titles truncate instead of widening the page. */}

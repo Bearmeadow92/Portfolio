@@ -9,7 +9,7 @@ import { SectionHeading } from "../components/SectionHeading";
 export function About() {
   return (
     <section id="about" className="mx-auto max-w-[1400px] scroll-mt-20 px-5 py-28 sm:px-10">
-      <SectionHeading index="02" label="About" title="Careful by training. Curious by nature." />
+      <SectionHeading index="02" label="About" title="Learning out loud." />
 
       <div className="grid gap-x-4 gap-y-14 md:grid-cols-[10rem_1fr]">
         <div className="hidden md:block" aria-hidden />
@@ -17,7 +17,7 @@ export function About() {
           <Reveal>
             <p className="max-w-4xl text-2xl leading-snug sm:text-[2rem] sm:leading-[1.25]">{profile.about.lead}</p>
           </Reveal>
-          <Reveal className="mt-10 grid max-w-4xl gap-8 text-muted sm:grid-cols-2" delay={80}>
+          <Reveal className="mt-10 grid max-w-5xl gap-8 text-muted md:grid-cols-3" delay={80}>
             {profile.about.body.map((paragraph) => (
               <p key={paragraph}>{paragraph}</p>
             ))}

@@ -45,8 +45,8 @@ export const SECTIONS = ["home", "work", "about", "skills", "terminal", "source"
 const FILES: Record<string, string[]> = {
   "about.txt": [profile.about.lead, ...profile.about.body],
   "mission.txt": [
-    "Mission: land a software engineering role on a team that ships great products.",
-    "Method: keep learning, build in public, help the next technologist up the ladder.",
+    "Build software that holds up when it matters.",
+    "Keep learning out loud, and help the next technologist up the ladder.",
   ],
   "secrets.txt": ["Permission denied. Nice try though. Least privilege is a lifestyle."],
 };

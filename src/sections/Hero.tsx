@@ -26,7 +26,7 @@ export function Hero() {
           </span>
         </p>
 
-        <h1 className="display text-[clamp(2.9rem,9.2vw,9.75rem)]">
+        <h1 className="display text-[clamp(2.75rem,7.8vw,8.5rem)]">
           {profile.headline.map((line, i) => (
             <span key={line} className="rise">
               <span style={{ "--delay": `${0.08 + i * 0.1}s` } as CSSProperties}>{line}</span>
