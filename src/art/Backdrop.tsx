@@ -13,6 +13,10 @@
  * - With "prefers-reduced-motion", nothing animates. A single still frame is drawn
  *   when the scene, the window size, or the scroll position changes.
  *
+ * Telemetry: a few times per second the engine writes the pointer position and the
+ * measured frame rate into any element with `data-telemetry`, as plain text. It is a
+ * direct DOM write, so the readout costs no React renders.
+ *
  * Everything animated lives in refs and plain variables, so React renders this
  * component exactly once.
  */
@@ -34,7 +38,7 @@ type Vec3 = [number, number, number];
 
 interface Program {
   program: WebGLProgram;
-  uniforms: Record<"u_res" | "u_time" | "u_mouse" | "u_dim" | "u_pulse" | "u_bg" | "u_ink" | "u_accent", WebGLUniformLocation | null>;
+  uniforms: Record<"u_res" | "u_time" | "u_mouse" | "u_dim" | "u_pulse" | "u_clear" | "u_bg" | "u_ink" | "u_accent", WebGLUniformLocation | null>;
 }
 
 /** Strength of the next pulse. UI code bumps this, and the render loop decays it. */
@@ -86,7 +90,7 @@ function buildProgram(gl: WebGL2RenderingContext, vertex: WebGLShader, scene: Sc
     program,
     uniforms: {
       u_res: loc("u_res"), u_time: loc("u_time"), u_mouse: loc("u_mouse"), u_dim: loc("u_dim"),
-      u_pulse: loc("u_pulse"), u_bg: loc("u_bg"), u_ink: loc("u_ink"), u_accent: loc("u_accent"),
+      u_pulse: loc("u_pulse"), u_clear: loc("u_clear"), u_bg: loc("u_bg"), u_ink: loc("u_ink"), u_accent: loc("u_accent"),
     },
   };
 }
@@ -144,6 +148,12 @@ export function Backdrop() {
     let time = reduced ? 12 : 0; // A pleasant still frame when motion is disabled.
     let pulseLevel = 0;
     let dim = 1;
+    let clear = 1;
+    // Telemetry: frames counted since the last readout, and when that readout happened.
+    let telemetryFrames = 0;
+    let telemetryAt = performance.now();
+    let fps = 60;
+    const readouts = document.querySelectorAll<HTMLElement>("[data-telemetry]");
     let slowFrames = 0;
     let frames = 0;
     let idle = IDLE_AFTER;
@@ -170,9 +180,12 @@ export function Backdrop() {
 
     const draw = (dt: number) => {
       // Art is strongest in the hero and recedes behind the content further down.
-      const targetDim = 1 - 0.66 * Math.min(1, window.scrollY / (window.innerHeight * 0.75));
+      const targetDim = 1 - 0.78 * Math.min(1, window.scrollY / (window.innerHeight * 0.75));
       const k = reduced ? 1 : Math.min(1, dt * 6);
       dim += (targetDim - dim) * k;
+      // The clear zone behind the hero copy is strongest at the top and gone once scrolled.
+      const targetClear = 1 - Math.min(1, window.scrollY / (window.innerHeight * 0.6));
+      clear += (targetClear - clear) * k;
       ease(bg, palette.bg, k);
       ease(ink, palette.ink, k);
       ease(accent, palette.accent, k);
@@ -210,6 +223,7 @@ export function Backdrop() {
       gl.uniform2f(u.u_mouse, mouse.x, mouse.y);
       gl.uniform1f(u.u_dim, dim * fade);
       gl.uniform1f(u.u_pulse, pulseLevel);
+      gl.uniform1f(u.u_clear, clear);
       gl.uniform3f(u.u_bg, bg[0], bg[1], bg[2]);
       gl.uniform3f(u.u_ink, ink[0], ink[1], ink[2]);
       gl.uniform3f(u.u_accent, accent[0], accent[1], accent[2]);
@@ -222,6 +236,21 @@ export function Backdrop() {
       const dt = Math.min(elapsed / 1000, 0.05);
       time += dt;
       draw(dt);
+
+      // Telemetry readout, about four times a second.
+      telemetryFrames++;
+      if (now - telemetryAt > 250) {
+        fps = Math.round((telemetryFrames * 1000) / (now - telemetryAt));
+        telemetryFrames = 0;
+        telemetryAt = now;
+        const scale = window.innerWidth / width;
+        const px = String(Math.round(mouse.x * scale)).padStart(4, "0");
+        const py = String(Math.round(window.innerHeight - mouse.y * scale)).padStart(4, "0");
+        const text = `X ${px}  Y ${py}  ${String(fps).padStart(3, " ")} FPS`;
+        readouts.forEach((el) => {
+          el.textContent = text;
+        });
+      }
 
       // Adaptive resolution: sample 90 frames, and step quality down if most were slow.
       frames++;

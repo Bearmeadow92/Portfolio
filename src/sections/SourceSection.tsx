@@ -47,7 +47,7 @@ export function SourceSection() {
       {/* min-w-0 lets grid items shrink below their content width, so long commit titles truncate instead of widening the page. */}
       <div className="grid gap-x-16 gap-y-14 md:pl-[11rem] lg:grid-cols-2">
         <Reveal className="min-w-0">
-          <a href={repoUrl} target="_blank" rel="noreferrer" className="link break-all font-display text-2xl font-bold sm:text-3xl">
+          <a href={repoUrl} target="_blank" rel="noreferrer" className="link break-all font-display text-2xl font-medium tracking-tight sm:text-3xl">
             {profile.github}/{profile.repo}
           </a>
 

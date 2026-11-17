@@ -11,7 +11,7 @@ export function About() {
     <section id="about" className="mx-auto max-w-[1400px] scroll-mt-20 px-5 py-28 sm:px-10">
       <SectionHeading index="02" label="About" title="Careful by training. Curious by nature." />
 
-      <div className="grid gap-x-16 gap-y-14 md:grid-cols-[10rem_1fr]">
+      <div className="grid gap-x-4 gap-y-14 md:grid-cols-[10rem_1fr]">
         <div className="hidden md:block" aria-hidden />
         <div>
           <Reveal>
@@ -30,7 +30,7 @@ export function About() {
             {timeline.map((entry) => (
               <li key={entry.title} className="grid grid-cols-[6.5rem_1fr] items-baseline gap-x-6 border-t border-border py-4 sm:grid-cols-[9rem_1fr_1fr]">
                 <span className="label opacity-70">{entry.period}</span>
-                <span className="font-display text-xl font-bold">{entry.title}</span>
+                <span className="font-display text-xl font-medium tracking-tight">{entry.title}</span>
                 <span className="col-start-2 text-muted sm:col-start-3">{entry.org}</span>
               </li>
             ))}
@@ -44,7 +44,7 @@ export function About() {
               <li key={item.title} className="grid grid-cols-[2rem_1fr] gap-x-3">
                 <span className="label pt-1.5 text-accent">0{i + 1}</span>
                 <div>
-                  <h3 className="font-display text-xl font-bold">{item.title}</h3>
+                  <h3 className="font-display text-xl font-medium tracking-tight">{item.title}</h3>
                   <p className="mt-1 text-muted">{item.note}</p>
                 </div>
               </li>

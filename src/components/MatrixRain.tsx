@@ -33,7 +33,7 @@ export function MatrixRain() {
       last = t;
       ctx.fillStyle = "rgba(0, 0, 0, 0.08)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.font = `${size}px 'DM Mono', monospace`;
+      ctx.font = `${size}px 'Geist Mono', monospace`;
       drops.forEach((row, col) => {
         const ch = GLYPHS[Math.floor(Math.random() * GLYPHS.length)]!;
         ctx.fillStyle = Math.random() > 0.95 ? "#ffffff" : color;

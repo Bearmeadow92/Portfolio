@@ -11,6 +11,7 @@
  *   u_mouse   Smoothed pointer position in pixels, origin at the bottom left.
  *   u_dim     Art intensity: 1 in the hero, lower behind text so content stays readable.
  *   u_pulse   A short kick (1 fading to 0) fired by UI events like clicks.
+ *   u_clear   How strongly the art steps back behind the hero's text column (0 to 1).
  *   u_bg, u_ink, u_accent   The active scene's palette, read from CSS variables.
  */
 import type { SceneId } from "../lib/scene";
@@ -31,6 +32,7 @@ uniform float u_time;
 uniform vec2 u_mouse;
 uniform float u_dim;
 uniform float u_pulse;
+uniform float u_clear;
 uniform vec3 u_bg;
 uniform vec3 u_ink;
 uniform vec3 u_accent;
@@ -69,6 +71,16 @@ float fbm(vec2 p) {
   return value;
 }
 
+// How present the art should be at this pixel. Starts from u_dim (scroll based), then,
+// while u_clear is up, fades the left side where the hero copy sits. On portrait screens
+// the copy spans the full width, so the whole canvas steps back evenly instead.
+float presence() {
+  float x = gl_FragCoord.x / u_res.x;
+  float portrait = step(u_res.x, u_res.y);
+  float side = mix(1.0 - 0.72 * (1.0 - smoothstep(0.28, 0.82, x)), 0.5, portrait);
+  return u_dim * mix(1.0, side, u_clear);
+}
+
 // Pixel coordinates to aspect-correct coordinates centered on the screen (height = 1).
 vec2 toUv(vec2 frag) {
   return (frag - 0.5 * u_res) / u_res.y;
@@ -78,6 +90,7 @@ vec2 toUv(vec2 frag) {
 /** Contour: iso-lines of a drifting height field, like a living topographic map. */
 const CONTOUR = `
 void main() {
+  float pres = presence();
   vec2 uv = toUv(gl_FragCoord.xy);
   vec2 toMouse = uv - toUv(u_mouse);
   float t = u_time * 0.035;
@@ -91,19 +104,20 @@ void main() {
   float level = height * 18.0;
   float nearest = floor(level + 0.5);
   float width = fwidth(level);
-  float line = 1.0 - smoothstep(width * 0.6, width * 1.6, abs(level - nearest));
+  float line = 1.0 - smoothstep(width * 0.35, width * 1.15, abs(level - nearest));
 
   float major = mod(nearest, 5.0) < 0.5 ? 1.0 : 0.0; // Every fifth line is bolder.
-  vec3 color = mix(u_bg, u_ink, line * mix(0.2, 0.55, major) * u_dim);
+  vec3 color = mix(u_bg, u_ink, line * mix(0.16, 0.48, major) * pres);
 
   float highlighted = abs(nearest - 11.0) < 0.5 ? 1.0 : 0.0; // One level is drawn in the accent.
-  color = mix(color, u_accent, line * highlighted * u_dim * 0.9);
+  color = mix(color, u_accent, line * highlighted * pres * 0.9);
   outColor = vec4(color, 1.0);
 }`;
 
 /** Halftone: a grid of dots whose size follows a slow wave and swells near the cursor. */
 const HALFTONE = `
 void main() {
+  float pres = presence();
   float cell = max(18.0, u_res.y / 34.0);
   vec2 grid = gl_FragCoord.xy / cell;
   vec2 offset = fract(grid) - 0.5;                       // Position inside this cell.
@@ -120,13 +134,14 @@ void main() {
 
   vec3 dotColor = mix(u_ink, u_accent, smoothstep(0.15, 0.6, near));
   // Dots under the cursor glow at full strength in the hero, and more gently behind text.
-  float strength = mix(0.24 * u_dim, 0.45 + 0.55 * u_dim, near);
+  float strength = mix(0.24 * pres, 0.45 + 0.55 * pres, near);
   outColor = vec4(mix(u_bg, dotColor, dot_ * strength), 1.0);
 }`;
 
 /** Ripple: rings spreading from the cursor and two drifting sources, drawn where the waves cancel out. */
 const RIPPLE = `
 void main() {
+  float pres = presence();
   vec2 uv = toUv(gl_FragCoord.xy);
   vec2 mouse = toUv(u_mouse);
 
@@ -143,10 +158,10 @@ void main() {
 
   // Draw a one pixel line wherever the combined wave crosses zero.
   float width = fwidth(wave);
-  float line = 1.0 - smoothstep(width * 0.7, width * 1.8, abs(wave));
+  float line = 1.0 - smoothstep(width * 0.4, width * 1.2, abs(wave));
 
-  vec3 color = mix(u_bg, u_ink, line * 0.3 * u_dim);
-  color = mix(color, u_accent, line * exp(-dm * 2.4) * min(1.0, u_dim * 1.2)); // Gold near the cursor.
+  vec3 color = mix(u_bg, u_ink, line * 0.3 * pres);
+  color = mix(color, u_accent, line * exp(-dm * 2.4) * min(1.0, pres * 1.2)); // Gold near the cursor.
   outColor = vec4(color, 1.0);
 }`;
 
@@ -157,6 +172,7 @@ float ridge(vec2 p) {
 }
 
 void main() {
+  float pres = presence();
   vec2 uv = toUv(gl_FragCoord.xy);
   vec2 mouse = toUv(u_mouse);
   float spacing = 0.042;
@@ -174,13 +190,13 @@ void main() {
     float dy = baseY - mouse.y;
     float bump = exp(-dx * dx * 10.0 - dy * dy * 14.0);  // Lines bulge toward the cursor.
     float y = baseY + (n - 0.5) * 0.2 + bump * 0.07 + u_pulse * 0.012 * sin(k * 1.7);
-    float l = 1.0 - smoothstep(pixel * 0.7, pixel * 2.0, abs(uv.y - y));
+    float l = 1.0 - smoothstep(pixel * 0.45, pixel * 1.5, abs(uv.y - y));
     line = max(line, l);
     hot = max(hot, l * bump);
   }
 
-  vec3 color = mix(u_bg, u_ink, line * 0.5 * u_dim);
-  color = mix(color, u_accent, clamp(hot * 1.6, 0.0, 1.0) * (0.45 + 0.55 * u_dim));
+  vec3 color = mix(u_bg, u_ink, line * 0.5 * pres);
+  color = mix(color, u_accent, clamp(hot * 1.6, 0.0, 1.0) * (0.45 + 0.55 * pres));
   outColor = vec4(color, 1.0);
 }`;
 
