@@ -45,7 +45,7 @@ export interface CommandContext {
 }
 
 /** Section ids that `goto` (and the command palette) can scroll to. */
-export const SECTIONS = ["home", "work", "about", "skills", "terminal", "source", "contact"] as const;
+export const SECTIONS = ["home", "work", "about", "skills", "terminal", "contact"] as const;
 
 /**
  * Looks up `key` only among `obj`'s own properties, never inherited ones like

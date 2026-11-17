@@ -17,7 +17,6 @@ import { Contact } from "./sections/Contact";
 import { Footer } from "./sections/Footer";
 import { Hero } from "./sections/Hero";
 import { Skills } from "./sections/Skills";
-import { SourceSection } from "./sections/SourceSection";
 import { TerminalSection } from "./sections/TerminalSection";
 import { Work } from "./sections/Work";
 
@@ -37,7 +36,6 @@ export default function App() {
         <About />
         <Skills />
         <TerminalSection />
-        <SourceSection />
         <Contact />
       </main>
       <Footer />

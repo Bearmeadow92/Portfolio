@@ -15,9 +15,8 @@ export const profile = {
   /** Hero headline, one entry per line. */
   headline: ["Strong systems.", "Stronger people."],
   intro: "I'm Jesse. I build secure, dependable software, and I love helping the next person find their way into tech.",
-  /** GitHub username and the repository that holds this site (shown in the Source section). */
+  /** GitHub username, used for the GitHub link in the Contact section. */
   github: "Bearmeadow92",
-  repo: "Portfolio",
   links: {
     github: "https://github.com/Bearmeadow92",
     // TODO: replace with your real LinkedIn profile URL.

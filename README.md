@@ -45,7 +45,6 @@ Four switchable scenes, each a fragment shader written from scratch. Each scene 
 - **A cursor ring** that trails the mouse and grows over anything clickable.
 - **A working terminal** with history, tab completion, and commands that drive the site (`help`, `play firewall`, `scene chrome`, `sudo hire-jesse`).
 - **A command palette** (`Ctrl + K` / `Cmd + K`) with fuzzy search.
-- **A live source section** showing this repo's language breakdown and latest commits from the GitHub REST API.
 - **A Netlify Forms** contact form with validation and a spam honeypot.
 - **An easter egg**: try the Konami code (up, up, down, down, left, right, left, right, B, A).
 
