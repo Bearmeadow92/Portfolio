@@ -88,12 +88,25 @@ There is no state library. Three patterns cover everything:
 
 Each canvas game follows the same shape:
 
-- A **rules module** (`firewallRules.ts`, `byteBreakerLevels.ts`, `cipherMemoryRules.ts`)
+- A **rules module** (`firewall/rules.ts`, `byteBreakerLevels.ts`, `cipherMemoryRules.ts`)
   holds balance tables, level data, and algorithms as pure, unit tested functions.
 - A **World object** in a ref holds all mutable simulation state.
 - A **requestAnimationFrame loop** (`useGameLoop`) calls `update(dt)` and `draw()`.
 - **React state** tracks only the phase (`menu`, `playing`, `paused`, `intermission`,
   `over`) and the end of game summary.
+
+Firewall Defender is the largest game, so it splits one step further:
+
+- `firewall/rules.ts` builds the network map from a seed (rings of nodes, gates on the
+  edge), runs Dijkstra once from the core, and holds the wave, tower, ability, research,
+  and threat intel tables. Threats pick their next hop from that distance field, so routing
+  costs O(degree) per hop with no per-frame pathfinding.
+- `firewall/sim.ts` owns the World and `step(dt)`: spawning, movement, towers, boss
+  behaviors, abilities, and scoring. No React, no canvas.
+- `firewall/draw.ts` is the renderer and HUD. The static network is painted once to an
+  offscreen layer, and glow is a cached radial gradient sprite instead of `shadowBlur`.
+- The Research Lab save lives in localStorage, which a visitor can edit, so it is
+  sanitized on load: unknown ids are dropped and points are clamped.
 
 ## Complexity cheat sheet
 
@@ -111,7 +124,8 @@ Each canvas game follows the same shape:
 | Explosion chain reaction | Recursive, may revisit | O(k) for k bricks | Iterative flood fill, clear on visit |
 | Draw the brick wall | Redraw every frame | One `drawImage` | Offscreen canvas, repainted only when dirty |
 | Draw the game background | Redraw grid lines | One `drawImage` | Cached layer |
-| "Is the wave clear?" | O(packets) scan | O(1) | Counters |
+| Route a threat to the core | Pathfind per threat per frame | O(degree) per hop | Dijkstra once per map, then follow the distance field |
+| Glow on every entity | `shadowBlur` (slow) | One `drawImage` | Radial gradient sprite cached per color and size |
 | Filter skills by category | O(n) per click | O(1) | Map built once at module load |
 | Find a game or app by id | O(n) `find` | O(1) | Map index |
 | Group Kanban tasks | O(columns × n) | O(n) | Single pass, memoized |

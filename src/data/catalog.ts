@@ -24,10 +24,17 @@ export const catalog: readonly CatalogItem[] = [
     id: "firewall",
     kind: "game",
     title: "Firewall Defender",
-    tag: "Arcade",
-    blurb: "Defend your server core through waves of threats. Earn upgrades, unmask trojans, and survive the boss.",
-    tech: ["Canvas 2D", "Wave system", "Upgrades"],
-    highlights: ["Simulation runs outside React renders", "O(1) entity removal", "Pooled particles, zero GC"],
+    tag: "Tower defense",
+    blurb:
+      "Build defenses on a live network map and hold the core against ten kinds of real world threats, from worms and DDoS floods to ransomware, rootkit, and zero-day bosses. Every threat teaches the real defense the first time it shows up.",
+    tech: ["Canvas 2D", "Graph pathfinding", "Skill tree", "localStorage"],
+    highlights: [
+      "Threats route with a precomputed Dijkstra distance field",
+      "Pure rules module, unit tested",
+      "Research Lab save validated like untrusted input",
+      "Cached glow sprites instead of shadowBlur",
+      "Simulation runs outside React renders",
+    ],
   },
   {
     id: "bytebreaker",

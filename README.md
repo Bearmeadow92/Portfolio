@@ -30,7 +30,7 @@ Four switchable scenes, each a fragment shader written from scratch. Each scene 
 
 | Game | What it is |
 | --- | --- |
-| **Firewall Defender** | Defend your server core through waves of threats. Pick an upgrade after each wave, unmask trojans, and survive a boss every fifth wave. |
+| **Firewall Defender** | A network tower defense game. Place Firewalls, Scanners, Sandboxes, and Honeypots on a live network map, fire four abilities on cooldowns, and hold the core against worms, trojans, DDoS swarms, polymorphic malware, botnets, and a boss every fifth wave (Ransomware, Rootkit, Zero-day). Each threat comes with a one line field note on the real defense, and a Research Lab skill tree carries progress between runs. |
 | **Byte Breaker** | A brick breaker with eight hand-built levels, explosive chain reactions, lasers, fireballs, and multi ball. |
 | **Cipher Memory** | Match programming symbols across three tiers, with streaks, a limited peek power, and a mode where cards trade places. Fully keyboard accessible. |
 
