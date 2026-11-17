@@ -12,10 +12,10 @@ Four switchable scenes, each a fragment shader written from scratch. Each scene 
 
 | Scene | What it is |
 | --- | --- |
-| **Breach** | A live attack map. Packets stream across a node graph, hostile traffic flares red, and your cursor is a sensor that locks onto threats in range. Click to fire a probe. |
-| **Glyph** | A raymarched 3D sculpture rendered entirely in text characters, drawn from a 5×7 bitmap font packed into integers. The light follows your cursor. |
-| **Drivetrain** | Meshing gears, a crankshaft, and a piston in blueprint linework. The gear ratios are exact, and sweeping your cursor across the screen turns the crank. |
-| **Chrome** | A liquid metal sculpture, raymarched in real time and lit by a procedural studio. Your cursor orbits the camera. |
+| **Breach** | A quiet network that comes under attack every ten seconds. An attack beam strikes a node, infection spreads red through the graph, a firewall ring snaps up to contain it, and the network heals. |
+| **Glyph** | A spinning donut drawn in text characters with the classic `.,-~:;=!*#$@` ramp, in the spirit of Andy Sloane's donut.c. Each character cell raymarches the torus, and glyphs come from a 5×7 bitmap font packed into integers. |
+| **Drivetrain** | A 60° V-twin in blueprint linework: two pistons on one crank pin, valves on a half-speed cam, a timing belt, and a flywheel meshing an accessory gear. Moving fast or scrolling revs it, and the spokes motion blur at high RPM. |
+| **Chrome** | A machined hex bolt and nut in polished chrome. Sweeping your cursor across screws the nut along the thread, and a click spins it. The rim light slowly cycles through colors. |
 
 ### Tools (all client side, nothing leaves your browser)
 

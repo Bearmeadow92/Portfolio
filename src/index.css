@@ -57,29 +57,29 @@
 }
 
 [data-scene="drivetrain"] {
-  /* Bold: caution yellow, black linework, signal red. */
-  --bg: #ffd21f;
-  --surface: #ffdb4d;
-  --surface-2: #f2c400;
-  --border: #c9a50a;
-  --text: #15120a;
-  --muted: #4f4520;
-  --accent: #b31d00;
-  --good: #14632f;
-  --bad: #b31d00;
-  --warn: #6b4a00;
-  color-scheme: light;
+  /* Classic blueprint: deep blue paper, white linework, an orange marker. */
+  --bg: #103a8c;
+  --surface: #13429c;
+  --surface-2: #0d3277;
+  --border: #3c63b3;
+  --text: #f2f6ff;
+  --muted: #b4c6ec;
+  --accent: #ffa25c;
+  --good: #8ff0b4;
+  --bad: #ffb199;
+  --warn: #ffd27a;
+  color-scheme: dark;
 }
 
 [data-scene="chrome"] {
-  /* Cinematic: deep black, chrome, and a violet rim light. */
+  /* Cinematic: deep black and polished metal. The art's rim light cycles through colors. */
   --bg: #050506;
   --surface: #0d0d10;
   --surface-2: #16161a;
   --border: #29292f;
   --text: #ecebf0;
   --muted: #8e8c96;
-  --accent: #a58bff;
+  --accent: #7fd6ff;
   --good: #6fe09a;
   --bad: #ff7a5c;
   --warn: #f0b24a;

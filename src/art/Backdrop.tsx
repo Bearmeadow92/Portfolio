@@ -17,6 +17,12 @@
  * measured frame rate into any element with `data-telemetry`, as plain text. It is a
  * direct DOM write, so the readout costs no React renders.
  *
+ * Engine RPM: the Drivetrain scene needs motion that builds up and dies down, which a
+ * shader cannot remember from frame to frame. The CPU integrates it instead: pointer and
+ * scroll speed set a target angular velocity, the velocity eases toward it (quickly when
+ * revving, slowly when idling down), and the accumulated crank angle is uploaded each
+ * frame as u_crank, with the normalized speed as u_rpm.
+ *
  * Everything animated lives in refs and plain variables, so React renders this
  * component exactly once.
  */
@@ -24,6 +30,7 @@ import { useEffect, useRef } from "react";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { useActiveItem } from "../lib/launcher";
 import { getScene, useScene, type SceneId } from "../lib/scene";
+import { hexToVec3, type Vec3 } from "./color";
 import { FRAGMENT_SHADERS, VERTEX_SHADER } from "./shaders";
 
 /** Internal resolution multipliers, from sharpest to cheapest. */
@@ -34,11 +41,9 @@ const MAX_PIXEL_RATIO = 1.5;
 /** Seconds without pointer movement before the focal point starts drifting on its own. */
 const IDLE_AFTER = 3;
 
-type Vec3 = [number, number, number];
-
 interface Program {
   program: WebGLProgram;
-  uniforms: Record<"u_res" | "u_time" | "u_mouse" | "u_dim" | "u_pulse" | "u_clear" | "u_bg" | "u_ink" | "u_accent", WebGLUniformLocation | null>;
+  uniforms: Record<"u_res" | "u_time" | "u_mouse" | "u_dim" | "u_pulse" | "u_clear" | "u_crank" | "u_rpm" | "u_bg" | "u_ink" | "u_accent", WebGLUniformLocation | null>;
 }
 
 /** Strength of the next pulse. UI code bumps this, and the render loop decays it. */
@@ -47,12 +52,6 @@ let pendingPulse = 0;
 /** Sends a short ripple through the backdrop. Call it from clicks and other key moments. */
 export function pulse(strength = 1) {
   pendingPulse = Math.max(pendingPulse, strength);
-}
-
-/** Parses "#rrggbb" into three 0..1 channels for a shader uniform. */
-function hexToVec3(hex: string): Vec3 {
-  const n = parseInt(hex.trim().slice(1), 16);
-  return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
 }
 
 /** Reads the active scene's palette from the CSS variables on <html>. */
@@ -90,7 +89,7 @@ function buildProgram(gl: WebGL2RenderingContext, vertex: WebGLShader, scene: Sc
     program,
     uniforms: {
       u_res: loc("u_res"), u_time: loc("u_time"), u_mouse: loc("u_mouse"), u_dim: loc("u_dim"),
-      u_pulse: loc("u_pulse"), u_clear: loc("u_clear"), u_bg: loc("u_bg"), u_ink: loc("u_ink"), u_accent: loc("u_accent"),
+      u_pulse: loc("u_pulse"), u_clear: loc("u_clear"), u_crank: loc("u_crank"), u_rpm: loc("u_rpm"), u_bg: loc("u_bg"), u_ink: loc("u_ink"), u_accent: loc("u_accent"),
     },
   };
 }
@@ -149,6 +148,14 @@ export function Backdrop() {
     let pulseLevel = 0;
     let dim = 1;
     let clear = 1;
+    // Engine model for the Drivetrain scene (see the header comment).
+    const IDLE_SPEED = 0.6; // Radians per second at rest.
+    const MAX_BOOST = 14;
+    let crank = 0;
+    let crankSpeed = IDLE_SPEED;
+    let pointerSpeed = 0; // Pixels per second, decays every frame.
+    let lastPointer = { x: 0, y: 0, t: 0 };
+    let lastScrollY = window.scrollY;
     // Telemetry: frames counted since the last readout, and when that readout happened.
     let telemetryFrames = 0;
     let telemetryAt = performance.now();
@@ -201,6 +208,16 @@ export function Backdrop() {
         fade = reduced ? 1 : Math.min(1, fade + dt * 3);
       }
 
+      // Engine: activity from pointer and scroll speed sets the target crank speed.
+      const scrollSpeed = Math.abs(window.scrollY - lastScrollY) / Math.max(dt, 1 / 240);
+      lastScrollY = window.scrollY;
+      pointerSpeed *= Math.exp(-dt * 6);
+      const activity = Math.min(1, pointerSpeed / 1800 + scrollSpeed / 3000);
+      const targetSpeed = IDLE_SPEED + MAX_BOOST * activity;
+      const rate = targetSpeed > crankSpeed ? 5 : 0.9; // Spool up fast, idle down slowly.
+      crankSpeed += (targetSpeed - crankSpeed) * Math.min(1, dt * rate);
+      crank = (crank + crankSpeed * dt) % (Math.PI * 4); // Two turns: one full four-stroke cycle.
+
       if (pendingPulse > 0) {
         pulseLevel = Math.max(pulseLevel, pendingPulse);
         pendingPulse = 0;
@@ -224,6 +241,8 @@ export function Backdrop() {
       gl.uniform1f(u.u_dim, dim * fade);
       gl.uniform1f(u.u_pulse, pulseLevel);
       gl.uniform1f(u.u_clear, clear);
+      gl.uniform1f(u.u_crank, crank);
+      gl.uniform1f(u.u_rpm, (crankSpeed - IDLE_SPEED) / MAX_BOOST);
       gl.uniform3f(u.u_bg, bg[0], bg[1], bg[2]);
       gl.uniform3f(u.u_ink, ink[0], ink[1], ink[2]);
       gl.uniform3f(u.u_accent, accent[0], accent[1], accent[2]);
@@ -294,6 +313,12 @@ export function Backdrop() {
       mouse.tx = e.clientX * ratio;
       mouse.ty = (window.innerHeight - e.clientY) * ratio; // WebGL's origin is the bottom left.
       idle = 0;
+      // Pointer speed for the engine model, from the distance moved since the last event.
+      const now = performance.now();
+      const elapsed = Math.max(now - lastPointer.t, 8) / 1000;
+      const speed = Math.hypot(e.clientX - lastPointer.x, e.clientY - lastPointer.y) / elapsed;
+      if (lastPointer.t) pointerSpeed = Math.max(pointerSpeed, Math.min(speed, 6000));
+      lastPointer = { x: e.clientX, y: e.clientY, t: now };
     };
     const onPointerDown = () => pulse(1);
     const onResize = () => {
