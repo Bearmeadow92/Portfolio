@@ -90,8 +90,8 @@ export function Contact() {
 
   return (
     <section id="contact" className="mx-auto max-w-[1400px] scroll-mt-20 px-5 py-28 sm:px-10">
-      <SectionHeading index="06" label="Contact" title="Let's talk.">
-        Hiring, collaborating, or curious how something here works? Write to me. I usually reply within a day or two.
+      <SectionHeading index="05" label="Contact" title="Let's build something good.">
+        Hiring, collaborating, or just starting out and looking for advice? My inbox is open, and I answer every message, usually within a day or two.
       </SectionHeading>
 
       <div className="grid gap-x-16 gap-y-12 md:pl-[11rem] lg:grid-cols-[1fr_1.4fr]">

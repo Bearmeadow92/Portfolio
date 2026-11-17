@@ -3,8 +3,14 @@
  * Pure function: input string in, output lines plus an optional side effect description out.
  * Keeping it free of React and the DOM makes it trivial to unit test.
  *
- * Dispatch is an O(1) object lookup by command name, so adding commands never slows
- * the interpreter down.
+ * Dispatch is an O(1) lookup by command name, so adding commands never slows the
+ * interpreter down.
+ *
+ * Security note: every lookup keyed by user input goes through `own()`, which only
+ * returns properties the object defines itself. A plain `obj[input]` lookup would also
+ * find inherited built-ins like "constructor", "toString", or "__proto__", which made
+ * `cat constructor` crash the terminal. The input is otherwise treated purely as data:
+ * it is never evaluated, and output is rendered as text, never as HTML.
  */
 import { profile } from "../data/profile";
 import { skills } from "../data/skills";
@@ -39,14 +45,25 @@ export interface CommandContext {
 }
 
 /** Section ids that `goto` (and the command palette) can scroll to. */
-export const SECTIONS = ["home", "work", "about", "skills", "terminal", "source", "contact"] as const;
+export const SECTIONS = ["home", "work", "about", "skills", "terminal", "contact"] as const;
+
+/**
+ * Looks up `key` only among `obj`'s own properties, never inherited ones like
+ * "constructor" or "__proto__". Use it for every lookup keyed by user input. O(1).
+ */
+function own<T>(obj: Record<string, T>, key: string): T | undefined {
+  return Object.hasOwn(obj, key) ? obj[key] : undefined;
+}
+
+/** Longest input the interpreter will process. Anything longer is cut off. */
+export const MAX_INPUT = 200;
 
 /** The pretend filesystem behind `ls` and `cat`. */
 const FILES: Record<string, string[]> = {
   "about.txt": [profile.about.lead, ...profile.about.body],
   "mission.txt": [
-    "Mission: land a software engineering role on a team that ships great products.",
-    "Method: keep learning, build in public, help the next technologist up the ladder.",
+    "Build software that holds up when it matters.",
+    "Keep learning out loud, and help the next technologist up the ladder.",
   ],
   "secrets.txt": ["Permission denied. Nice try though. Least privilege is a lifestyle."],
 };
@@ -116,7 +133,7 @@ const commands: Record<string, Command> = {
     run: (args) => {
       const file = args[0];
       if (!file) return { lines: [l("usage: cat <file>. Try 'ls' to see files.", "warn")] };
-      const content = FILES[file];
+      const content = own(FILES, file);
       if (!content) return { lines: [l(`cat: ${file}: No such file or directory`, "bad")] };
       return { lines: content.map((c) => l(c, file === "secrets.txt" ? "bad" : "text")) };
     },
@@ -254,12 +271,13 @@ export const commandNames = Object.keys(commands).filter((n) => !commands[n]!.hi
  * @returns Output lines and, optionally, a side effect for the UI to perform.
  */
 export function runCommand(raw: string, ctx: CommandContext): CommandResult {
-  const input = raw.trim();
+  const input = raw.trim().slice(0, MAX_INPUT);
   if (!input) return { lines: [] };
   // Lightweight tokenizer: split on whitespace. Quotes are not needed for any command here.
   const [first = "", ...args] = input.split(/\s+/);
-  const name = ALIASES[first.toLowerCase()] ?? first.toLowerCase();
-  const cmd = commands[name];
+  const lower = first.toLowerCase();
+  const name = own(ALIASES, lower) ?? lower;
+  const cmd = own(commands, name);
   if (!cmd) return { lines: [l(`command not found: ${first}. Type 'help' for a list.`, "bad")] };
   return cmd.run(args, ctx);
 }
@@ -269,7 +287,7 @@ export function complete(partial: string): string[] {
   const parts = partial.split(/\s+/);
   if (parts.length <= 1) return commandNames.filter((c) => c.startsWith(partial.toLowerCase()));
   const [cmd, arg = ""] = parts;
-  const resolved = ALIASES[cmd!.toLowerCase()] ?? cmd!.toLowerCase();
+  const resolved = own(ALIASES, cmd!.toLowerCase()) ?? cmd!.toLowerCase();
   const pool: readonly string[] =
     resolved === "play" ? catalog.map((c) => c.id) : resolved === "goto" ? SECTIONS : resolved === "scene" ? SCENES.map((s) => s.id) : resolved === "cat" ? Object.keys(FILES) : [];
   return pool.filter((p) => p.startsWith(arg.toLowerCase())).map((p) => `${cmd} ${p}`);

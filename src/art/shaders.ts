@@ -6,7 +6,7 @@
  * which is why a full-screen animation can hold 60 fps.
  *
  * Scenes
- *   Breach      A calm node graph where a security incident plays out every ten seconds.
+ *   Breach      A 3D network flown over in perspective, where an attack lands every nine seconds.
  *   Glyph       A spinning donut drawn in text characters, in the spirit of donut.c.
  *   Drivetrain  A V-twin engine in blueprint linework that revs with pointer and scroll speed.
  *   Chrome      A machined hex bolt and nut in polished chrome, under shifting studio light.
@@ -84,7 +84,7 @@ float smin(float a, float b, float k) {
 float presence() {
   float x = gl_FragCoord.x / u_res.x;
   float portrait = step(u_res.x, u_res.y);
-  float side = mix(1.0 - 0.72 * (1.0 - smoothstep(0.28, 0.82, x)), 0.5, portrait);
+  float side = mix(1.0 - 0.72 * (1.0 - smoothstep(0.28, 0.82, x)), 0.32, portrait);
   return u_dim * mix(1.0, side, u_clear);
 }
 
@@ -96,7 +96,7 @@ vec2 toUv(vec2 frag) {
 // Where the art's focal object sits: right of center on wide screens (the hero copy is on
 // the left), and lower center on portrait screens.
 vec2 focus() {
-  return u_res.x > u_res.y ? vec2(0.4 * u_res.x / u_res.y - 0.18, 0.0) : vec2(0.0, -0.18);
+  return u_res.x > u_res.y ? vec2(0.42 * u_res.x / u_res.y - 0.15, 0.0) : vec2(0.0, -0.3);
 }
 
 // One-pixel anti-aliased line from a distance value.
@@ -110,117 +110,229 @@ float stroke(float d, float px) {
 /* -------------------------------------------------------------------------- */
 
 /**
- * A quiet network that periodically comes under attack.
+ * A 3D attack map. The network lies on a floor in perspective and scrolls toward the
+ * camera, as if flying over a city of data. Every nine seconds an incident plays out:
+ *   1. Lock-on    A targeting ring closes in on one node.
+ *   2. Strike     An attack arc drops out of the sky onto it.
+ *   3. Impact     A flash, a shockwave across the floor, and a red pulse at the edges.
+ *   4. Spread     Infection races outward along the links.
+ *   5. Contain    A firewall curtain rises from the floor and stops the spread cold.
+ *   6. Recover    The red fades and normal traffic resumes.
+ * Incident positions come from hashing the incident number, so the shader is stateless.
  *
- * Most of the time it is calm: sparse nodes and faint links carry slow white packets.
- * Every ten seconds an incident plays out in four acts:
- *   1. Strike      An attack beam streaks in from off screen and hits a node.
- *   2. Spread      Infection spreads outward through the graph, turning it red.
- *   3. Contain     A firewall ring snaps up around the breach and stops the spread.
- *   4. Recover     The red fades out and the network returns to calm.
- * The incident's position and timing come from hashing the incident number, so every
- * incident is different but the shader stays stateless.
- *
- * Per pixel, only the 3x3 neighborhood of grid cells is checked, so the cost is constant.
+ * Rendering: each pixel's ray is intersected with the floor plane (y = 0), and the
+ * network is drawn in floor coordinates, checking only the 3x3 nearby grid cells, so
+ * the cost is constant. fwidth() keeps lines one pixel wide at any distance. The
+ * firewall is an analytic ray-cylinder intersection, and the attack arc is a 3D curve
+ * projected to the screen as a short polyline.
  */
 const BREACH = `
-const float SP = 0.17;       // Grid spacing between nodes.
-const float PERIOD = 10.0;   // Seconds between incidents.
-const float FIREWALL = 0.34; // Radius at which the firewall contains the spread.
+const float SP = 0.34;     // Node spacing on the floor, in world units.
+const float PERIOD = 9.0;  // Seconds between incidents.
+const float FW = 0.62;     // Firewall radius.
+const float SCROLL = 0.07; // How fast the network glides toward the camera.
+const float FOCAL = 1.5;
+
+vec3 ro;
+vec3 camF;
+vec3 camR;
+vec3 camU;
 
 vec2 nodePos(vec2 cell) {
   return (cell + 0.2 + 0.6 * vec2(hash(cell), hash(cell + 17.3))) * SP;
 }
 
+// Projects a world point to screen coordinates (the same space as toUv).
+vec2 project(vec3 x) {
+  vec3 v = x - ro;
+  float z = max(dot(v, camF), 0.01);
+  return vec2(dot(v, camR), dot(v, camU)) * FOCAL / z;
+}
+
+// Places the camera high over the floor, looking toward the right of the screen.
+void setCamera(float yaw) {
+  vec3 target = vec3(0.55, 0.0, 1.9);
+  ro = target + vec3(-sin(yaw) * 4.0, 1.45, -cos(yaw) * 4.0);
+  camF = normalize(target - ro);
+  camR = normalize(cross(vec3(0.0, 1.0, 0.0), camF));
+  camU = cross(camF, camR);
+}
+
+vec3 rayDir(vec2 uv) {
+  return normalize(camF * FOCAL + camR * uv.x + camU * uv.y);
+}
+
 void main() {
   float pres = presence();
-  float px = 1.0 / u_res.y;
-  float aspect = u_res.x / u_res.y;
-  vec2 drift = vec2(u_time * 0.008, u_time * 0.003);
-  vec2 q = toUv(gl_FragCoord.xy) + drift;
-  vec2 m = toUv(u_mouse) + drift;
+  float hot = max(pres, 0.45 * u_clear); // Incidents stay vivid in the hero, calmer behind text.
+  vec2 uv = toUv(gl_FragCoord.xy);
+  vec2 m = toUv(u_mouse);
 
-  // The current incident: where it is, and how far through its four acts.
+  /* ------------------------------ The incident ----------------------------- */
   float incident = floor(u_time / PERIOD);
   float phase = fract(u_time / PERIOD);
-  vec2 origin = vec2(mix(-0.05, 0.42, hash(vec2(incident, 1.3))) * aspect, mix(-0.3, 0.3, hash(vec2(incident, 7.1)))) + drift;
-  float spread = min(smoothstep(0.08, 0.42, phase) * 0.6, FIREWALL);
-  float alive = smoothstep(0.07, 0.09, phase) * (1.0 - smoothstep(0.62, 0.9, phase));
-  float wall = smoothstep(0.22, 0.3, phase) * (1.0 - smoothstep(0.7, 0.92, phase));
-  float impact = smoothstep(0.3, 0.38, phase) * (1.0 - smoothstep(0.38, 0.55, phase)); // Spread hits the wall.
+  float startTime = incident * PERIOD;
 
-  float links = 0.0;
-  float packets = 0.0;
-  float nodes = 0.0;
-  float redLinks = 0.0;
-  float redNodes = 0.0;
+  // Choose the target on SCREEN first (in the open space beside the hero copy), then
+  // trace it down to the floor. Picking in world space let incidents land behind the
+  // headline. The pick uses the camera as it was at the incident's start, without the
+  // cursor's influence, so the target node never jumps while the incident plays.
+  float aspect = u_res.x / u_res.y;
+  vec2 pickScreen = aspect > 1.0
+    ? vec2(mix(0.06, 0.4, hash(vec2(incident, 1.3))) * aspect, mix(-0.2, 0.0, hash(vec2(incident, 7.1))))
+    : vec2(mix(-0.25, 0.25, hash(vec2(incident, 1.3))), mix(-0.44, -0.3, hash(vec2(incident, 7.1))));
+  setCamera(sin(startTime * 0.05) * 0.05);
+  vec3 pd = rayDir(pickScreen);
+  vec2 pickWorld = (ro + pd * (ro.y / max(-pd.y, 0.05))).xz;
+  vec2 originNet = nodePos(floor((pickWorld + vec2(0.0, startTime * SCROLL)) / SP));
+
+  // The live camera, nudged by the cursor.
+  setCamera(m.x * 0.12 + sin(u_time * 0.05) * 0.05);
+  vec3 rd = rayDir(uv);
+
+  // Floor intersection. Computed for every pixel (fwidth needs uniform control flow),
+  // then masked to pixels that actually look down at the floor.
+  float tFloor = ro.y / max(-rd.y, 0.001);
+  float onFloor = step(rd.y, -0.002);
+  vec2 world = (ro + rd * tFloor).xz;
+  vec2 q = world + vec2(0.0, u_time * SCROLL); // Network space scrolls with the floor.
+  float px = max(fwidth(q.x), fwidth(q.y));
+  float fog = onFloor * exp(-tFloor * 0.15) * smoothstep(0.0, 0.06, -rd.y);
+  // Level of detail: once grid cells shrink to a few pixels, the lines would alias into
+  // grain, so the network fades out smoothly before that happens.
+  float lod = 1.0 - smoothstep(0.022, 0.055, px);
+
+  vec2 originW = originNet - vec2(0.0, u_time * SCROLL);
+  vec3 T = vec3(originW.x, 0.0, originW.y);
+
+  float hit = smoothstep(0.14, 0.16, phase);
+  float alive = hit * (1.0 - smoothstep(0.66, 0.86, phase));
+  float spread = min(smoothstep(0.17, 0.42, phase) * FW * 1.08, FW);
+  float wallUp = smoothstep(0.26, 0.34, phase) * (1.0 - smoothstep(0.72, 0.9, phase));
+  float wallFlash = smoothstep(0.39, 0.42, phase) * (1.0 - smoothstep(0.42, 0.56, phase));
+  float impact = smoothstep(0.145, 0.155, phase) * (1.0 - smoothstep(0.155, 0.32, phase));
+
+  /* ------------------------------- The network ----------------------------- */
+  float links = 0.0, packets = 0.0, nodes = 0.0, redLinks = 0.0, redNodes = 0.0;
+
+  // The cursor's spot on the floor, for the sensor ring.
+  vec3 mrd = rayDir(m);
+  float mt = ro.y / max(-mrd.y, 0.02);
+  vec2 mq = (ro + mrd * mt).xz + vec2(0.0, u_time * SCROLL);
+  float near = exp(-dot(q - mq, q - mq) * 3.0);
 
   vec2 cell = floor(q / SP);
   for (int j = -1; j <= 1; j++) {
     for (int i = -1; i <= 1; i++) {
       vec2 k = cell + vec2(float(i), float(j));
       vec2 a = nodePos(k);
-      float infectedA = step(length(a - origin), spread) * alive;
-
+      float infectedA = step(length(a - originNet), spread) * alive;
+      float r = max(0.014, px * 1.3);
       float dn = length(q - a);
-      float dot_ = 1.0 - smoothstep(0.003, 0.003 + px, dn);
+      float dot_ = 1.0 - smoothstep(r - px, r, dn);
       nodes = max(nodes, dot_ * (1.0 - infectedA));
-      // Infected nodes get a pulsing ring.
-      float ring = stroke(dn - 0.011 - 0.004 * sin(u_time * 9.0), px) * infectedA;
+      float ring = stroke(dn - 0.035 - 0.01 * sin(u_time * 10.0), px) * infectedA;
       redNodes = max(redNodes, max(dot_ * infectedA, ring));
 
-      for (int e = 0; e < 2; e++) {
-        vec2 dir = e == 0 ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
-        vec2 id = k * 2.0 + float(e);
-        if (hash(id + 3.1) > 0.55) continue; // Sparse graph: about half the links exist.
+      for (int e = 0; e < 3; e++) {
+        vec2 dir = e == 0 ? vec2(1.0, 0.0) : e == 1 ? vec2(0.0, 1.0) : vec2(1.0, -1.0);
+        vec2 id = k * 3.0 + float(e);
+        if (hash(id + 3.1) > (e == 2 ? 0.3 : 0.75)) continue;
         vec2 b = nodePos(k + dir);
-        float infected = step(length(mix(a, b, 0.5) - origin), spread) * alive;
+        float infected = step(length(mix(a, b, 0.5) - originNet), spread) * alive;
         float l = stroke(sdSegment(q, a, b), px);
         links = max(links, l * (1.0 - infected));
         redLinks = max(redLinks, l * infected);
 
-        // Calm traffic is slow. Infected links run hot and fast.
-        float speed = mix(0.05 + 0.08 * hash(id + 5.5), 0.6, infected);
+        float speed = mix(0.1 + 0.15 * hash(id + 5.5), 0.9, infected);
         float t = fract(u_time * speed + hash(id));
         if (hash(id + 2.2) > 0.5) t = 1.0 - t;
-        float dp = length(q - mix(a, b, t));
-        float pkt = 1.0 - smoothstep(0.0024, 0.0024 + px, dp);
+        float pr = max(0.011, px * 1.1);
+        float pkt = 1.0 - smoothstep(pr - px, pr, length(q - mix(a, b, t)));
         packets = max(packets, pkt * (1.0 - infected));
         redLinks = max(redLinks, pkt * infected);
       }
     }
   }
 
-  // Act 1: the strike. A beam streaks in from off screen to the origin.
-  vec2 source = origin + normalize(vec2(hash(vec2(incident, 3.3)) - 0.5, 0.6)) * 2.0;
-  float travel = smoothstep(0.0, 0.08, phase);
-  vec2 head = mix(source, origin, travel);
-  vec2 tail = mix(source, origin, max(travel - 0.25, 0.0));
-  float beam = stroke(sdSegment(q, tail, head), px * 1.4) * (1.0 - smoothstep(0.08, 0.14, phase));
-  float flash = exp(-length(q - origin) * 22.0) * smoothstep(0.06, 0.08, phase) * (1.0 - smoothstep(0.08, 0.2, phase));
+  /* ------------------------- Floor effects (network space) ------------------ */
+  float dO = length(q - originNet);
+  float angO = atan(q.y - originNet.y, q.x - originNet.x);
+  // Lock-on: a dashed ring closing in on the target before the strike.
+  float lockR = mix(0.6, 0.07, smoothstep(0.0, 0.14, phase));
+  float lock = stroke(dO - lockR, px * 1.3) * step(0.4, fract(angO * 4.0 / PI + u_time * 0.8)) * (1.0 - smoothstep(0.14, 0.16, phase));
+  // Impact flash and shockwave.
+  float flash = exp(-dO * 5.0) * impact;
+  float shock = stroke(dO - (phase - 0.15) / 0.17 * 1.3, px * 2.5) * impact;
+  // Firewall base ring.
+  float wallBase = stroke(dO - FW, px * 1.5) * wallUp;
+  // Cursor sensor ring and click probe.
+  float dM = length(q - mq);
+  float sensor = stroke(dM - 0.16, px * 1.2) * step(0.35, fract(atan(q.y - mq.y, q.x - mq.x) * 6.0 / PI - u_time * 0.4));
+  float probe = u_pulse * stroke(dM - (1.0 - u_pulse) * 2.8, px * 2.5);
 
-  // Act 3: the firewall. A dashed ring that brightens on impact.
-  float d = length(q - origin);
-  float angle = atan(q.y - origin.y, q.x - origin.x);
-  float dashes = step(0.35, fract(angle * 18.0 / PI));
-  float firewall = stroke(d - FIREWALL - 0.012, px * 1.2) * wall * mix(dashes, 1.0, impact);
-  float shock = stroke(d - FIREWALL - 0.012 - impact * 0.05, px * 3.0) * impact * 0.6;
+  /* --------------------------- Firewall curtain (3D) ------------------------ */
+  float wall = 0.0;
+  float H = 0.32 * wallUp;
+  vec2 oc = ro.xz - originW;
+  float A = dot(rd.xz, rd.xz);
+  float B = dot(oc, rd.xz);
+  float C = dot(oc, oc) - FW * FW;
+  float disc = B * B - A * C;
+  if (disc > 0.0 && H > 0.001) {
+    float sq = sqrt(disc);
+    for (int s = 0; s < 2; s++) {
+      float ti = (-B + (s == 0 ? -sq : sq)) / A;
+      if (ti <= 0.0 || (onFloor > 0.5 && ti > tFloor)) continue;
+      vec3 p = ro + rd * ti;
+      if (p.y < 0.0 || p.y > H) continue;
+      float ang = atan(p.z - originW.y, p.x - originW.x);
+      float rib = smoothstep(0.9, 0.97, fract(ang * 36.0 / (2.0 * PI)));
+      float scan = smoothstep(0.75, 1.0, fract(p.y * 26.0 - u_time * 2.5));
+      float top = smoothstep(H - 0.03, H, p.y);
+      float face = s == 0 ? 1.0 : 0.45; // The far side of the curtain is dimmer.
+      wall = max(wall, (0.07 + rib * 0.35 + scan * 0.12 + top * 0.9) * face * exp(-ti * 0.12) * (1.0 + 2.5 * wallFlash));
+    }
+  }
 
-  // The cursor: a small sensor reticle, and a probe ring on click.
-  float sensor = stroke(length(q - m) - 0.03, px) * 0.6;
-  float probe = u_pulse * stroke(length(q - m) - (1.0 - u_pulse) * 1.1, px * 2.0);
+  /* ------------------------------ Attack arc (3D) --------------------------- */
+  float arc = 0.0;
+  float head = smoothstep(0.0, 0.15, phase);
+  if (phase < 0.18) {
+    vec3 S = T + vec3((hash(vec2(incident, 3.3)) - 0.5) * 3.4, 2.8, 2.6);
+    float tail = max(head - 0.45, 0.0);
+    vec2 prev = project(mix(S, T, tail) + vec3(0.0, sin(PI * tail) * 0.9, 0.0));
+    float spx = 1.0 / u_res.y;
+    for (int k = 1; k <= 18; k++) {
+      float sk = mix(tail, head, float(k) / 18.0);
+      vec2 cur = project(mix(S, T, sk) + vec3(0.0, sin(PI * sk) * 0.9, 0.0));
+      float fade = float(k) / 18.0; // Brighter toward the head.
+      arc = max(arc, stroke(sdSegment(uv, prev, cur), spx * 1.8) * fade);
+      prev = cur;
+    }
+    arc = max(arc, exp(-length(uv - prev) * 120.0) * 1.5); // Glowing warhead.
+    arc *= 1.0 - smoothstep(0.15, 0.18, phase);
+  }
 
+  /* -------------------------------- Compose -------------------------------- */
+  float haze = exp(-abs(rd.y) * 28.0) * 0.07;
   vec3 color = u_bg;
-  color = mix(color, u_ink, links * 0.11 * pres);
-  color = mix(color, u_ink, nodes * 0.4 * pres);
-  color = mix(color, u_ink, packets * 0.5 * pres);
-  float hot = max(pres, 0.45);
-  color = mix(color, u_accent, redLinks * 0.85 * hot);
-  color = mix(color, u_accent, redNodes * hot);
-  color = mix(color, u_accent, (beam + flash) * hot);
-  color = mix(color, u_ink, max(firewall, shock) * 0.9 * hot);
-  color = mix(color, u_ink, sensor * pres);
-  color = mix(color, u_ink, probe * 0.6);
+  color = mix(color, u_ink, haze * pres);
+  color = mix(color, u_ink, links * 0.17 * fog * lod * pres);
+  color = mix(color, u_ink, nodes * (0.5 + 0.5 * near) * fog * lod * pres);
+  color = mix(color, u_ink, packets * (0.55 + 0.45 * near) * fog * lod * pres);
+  color = mix(color, u_ink, sensor * 0.55 * fog * pres);
+  color = mix(color, u_ink, probe * 0.7 * fog);
+  color = mix(color, u_accent, redLinks * 0.9 * fog * hot);
+  color = mix(color, u_accent, redNodes * fog * hot);
+  color = mix(color, u_accent, lock * fog * hot);
+  color = mix(color, u_accent, clamp(flash + shock * 0.8, 0.0, 1.0) * fog * hot);
+  color = mix(color, u_ink, wallBase * 0.8 * fog * hot);
+  color = mix(color, u_ink, clamp(wall, 0.0, 1.0) * hot);
+  color = mix(color, u_accent, clamp(arc, 0.0, 1.0) * hot);
+  // The screen edges pulse red on impact.
+  float vignette = smoothstep(0.35, 1.1, length(uv * vec2(0.75, 1.15)));
+  color = mix(color, u_accent, vignette * impact * 0.22 * hot);
   outColor = vec4(color, 1.0);
 }`;
 
@@ -265,7 +377,7 @@ float sdTorus(vec3 p) {
 
 void main() {
   float pres = presence();
-  float cellH = max(13.0, floor(u_res.y / 46.0));
+  float cellH = max(11.0, floor(u_res.y / 58.0));
   float cellW = floor(cellH * 0.62);
   vec2 cellId = floor(gl_FragCoord.xy / vec2(cellW, cellH));
   vec2 local = fract(gl_FragCoord.xy / vec2(cellW, cellH));
@@ -274,7 +386,8 @@ void main() {
   // Raymarch the torus from this cell's center. Every pixel in a cell shares one sample.
   mat3 r = tumble();
   mat3 inv = transpose(r);
-  vec2 uv = toUv(center) - focus();
+  // On portrait screens the donut shrinks so it fits under the text instead of behind it.
+  vec2 uv = (toUv(center) - focus()) * mix(1.0, 1.8, step(u_res.x, u_res.y));
   vec3 ro = inv * vec3(0.0, 0.0, -7.2);
   vec3 rd = inv * normalize(vec3(uv, 1.55));
   float dist = 0.0;
@@ -299,8 +412,8 @@ void main() {
     // Map lighting to the ramp the way donut.c does: surfaces facing away from the light
     // get the dimmest glyph (so the silhouette still reads), lit ones climb the ramp.
     lum = diffuse <= 0.0 ? 0.09 : 0.16 + 0.84 * diffuse;
-  } else if (hash(cellId) < 0.03) {
-    lum = 0.085; // A sparse field of dots in the empty space.
+    // Depth shading: the far side of the ring recedes, which sells the 3D form.
+    lum *= mix(1.0, 0.72, smoothstep(6.4, 8.0, dist));
   }
 
   // A click scrambles a ring of glyphs spreading outward.
@@ -394,7 +507,7 @@ void main() {
     float walls = min(abs(abs(c.x) - 0.07), 1.0) + max(max(boreBottom - c.y, c.y - boreTop), 0.0);
     lines = max(lines, stroke(walls, px));
     // Cooling fins on the outside of the barrel.
-    float fins = stroke(fract((c.y - boreBottom) / 0.025) * 0.025 - 0.0125, px) * step(boreBottom, c.y) * step(c.y, boreTop - 0.02) * step(0.07, abs(c.x)) * step(abs(c.x), 0.1);
+    float fins = stroke(fract((c.y - boreBottom) / 0.04) * 0.04 - 0.02, px) * step(boreBottom, c.y) * step(c.y, boreTop - 0.02) * step(0.07, abs(c.x)) * step(abs(c.x), 0.1);
     lines = max(lines, fins * 0.6);
     // Piston, wrist pin, and connecting rod.
     float pistonY = s + 0.03;
@@ -403,8 +516,15 @@ void main() {
     hot = max(hot, stroke(sdSegment(uv, pin, wrist), px * 1.6));
     hot = max(hot, stroke(length(uv - wrist) - 0.01, px));
 
-    // Cylinder head, and two valves opened by a half speed cam (one cycle per two turns).
+    // Cylinder head with four head bolts, and a spark plug on top.
     lines = max(lines, stroke(boxOutline(c - vec2(0.0, boreTop + 0.04), vec2(0.11, 0.04)), px));
+    for (int hb = 0; hb < 2; hb++) {
+      float hx = hb == 0 ? -0.088 : 0.088;
+      lines = max(lines, stroke(length(c - vec2(hx, boreTop + 0.04)) - 0.008, px));
+    }
+    lines = max(lines, stroke(boxOutline(c - vec2(0.0, boreTop + 0.1), vec2(0.012, 0.02)), px));
+    lines = max(lines, stroke(sdSegment(c, vec2(0.0, boreTop + 0.12), vec2(0.0, boreTop + 0.145)), px));
+    // Valves opened by a half speed cam (one cycle per two crank turns).
     for (int v = 0; v < 2; v++) {
       float vs = v == 0 ? -1.0 : 1.0;
       float cam = angle * 0.5 + side * 0.9 + vs * 1.9;
@@ -505,8 +625,12 @@ float scene(vec3 p) {
   vec3 hp = p - vec3(0.0, 0.78, 0.0);
   float head = chamferedHex(hp, 0.38, 0.13);
   float theta = atan(p.z, p.x);
-  float thread = 0.012 * sin(p.y * 2.0 * PI / PITCH + theta);
+  // The thread runs out just under the head, leaving a smooth neck like a real bolt.
+  float threaded = smoothstep(0.52, 0.44, p.y);
+  float thread = 0.012 * sin(p.y * 2.0 * PI / PITCH + theta) * threaded;
   float shaft = max(length(p.xz) - 0.2 + thread, abs(p.y + 0.18) - 0.85);
+  // Chamfer the tip with a cone so the end of the bolt reads as machined.
+  shaft = max(shaft, (length(p.xz) - (p.y + 1.03) * 1.2 - 0.13) * 0.7);
   float bolt = min(head, shaft);
 
   // The nut: a chamfered hex with a bore, turned to match its height on the thread.
@@ -514,7 +638,10 @@ float scene(vec3 p) {
   vec3 np = p - vec3(0.0, y, 0.0);
   np.xz = rot(y * 2.0 * PI / PITCH + u_pulse * 6.0) * np.xz;
   float nut = max(chamferedHex(np, 0.34, 0.15), -(length(np.xz) - 0.215));
-  return min(bolt, nut);
+  // A flat washer riding just under the nut.
+  vec3 wp = p - vec3(0.0, y - 0.175, 0.0);
+  float washer = max(abs(length(wp.xz) - 0.3) - 0.085, abs(wp.y) - 0.018);
+  return min(min(bolt, nut), washer);
 }
 
 vec3 normalAt(vec3 p) {

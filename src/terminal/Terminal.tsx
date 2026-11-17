@@ -5,7 +5,7 @@
  * lives in the pure `runCommand` function in commands.ts.
  */
 import { useEffect, useRef, useState } from "react";
-import { complete, runCommand, type Line, type Tone } from "./commands";
+import { MAX_INPUT, complete, runCommand, type Line, type Tone } from "./commands";
 import { performAction } from "./actions";
 
 /** Tailwind text color for each output tone. */
@@ -137,6 +137,7 @@ export function Terminal() {
             autoCapitalize="off"
             spellCheck={false}
             aria-label="Terminal command input"
+            maxLength={MAX_INPUT}
           />
         </form>
       </div>
