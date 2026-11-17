@@ -51,11 +51,15 @@ There is no state library. Three patterns cover everything:
   rotation, segment distance, smooth minimum) and a fixed set of uniforms (time, pointer
   position, art intensity, a pulse, a clear zone, and three colors).
   - *Breach* checks only the 3x3 neighborhood of grid cells per pixel, so its cost is
-    constant however large the node graph is.
+    constant however large the node graph is. Each incident's position and timing come
+    from hashing the incident number, so the shader stays stateless.
   - *Glyph* raymarches once per character cell and draws glyphs from a 5x7 bitmap font
     stored as integers (split in two, since 35 bits do not fit in a 32-bit int).
-  - *Drivetrain* is pure 2D distance fields with exact gear ratios, so it is cheap.
-  - *Chrome* is a raymarched signed distance field with a procedural studio reflection.
+  - *Drivetrain* is pure 2D distance fields (a slider crank solved per cylinder), so it
+    is cheap. Its crank angle is integrated on the CPU (see below).
+  - *Chrome* is a raymarched signed distance field (chamfered hex prisms and a helical
+    thread). Reflection lookups are offset by surface position to fake nearby studio
+    lights, which gives flat faces the gradients of a real product shot.
 - **The engine** (`Backdrop.tsx`) compiles a scene's program the first time it is shown and
   caches it. Each frame uploads eight uniforms and draws one triangle. Nothing is allocated.
 - **Color** comes from CSS. Each scene's palette is a block of CSS variables in `index.css`.
@@ -64,6 +68,13 @@ There is no state library. Three patterns cover everything:
   utilities read the same variables, so the interface re-tints with no React re-render.
 - **Legibility**: a `u_dim` uniform tracks scroll position. The art is at full strength in
   the hero and recedes behind the content below it.
+- **Engine RPM**: Drivetrain needs motion that builds up and dies down, which a shader
+  cannot remember between frames. The CPU measures pointer and scroll speed, eases an
+  angular velocity toward a target (fast to rev, slow to idle), integrates the crank
+  angle, and uploads it as a uniform.
+- **Color parsing**: palettes are read from CSS, and the production minifier shortens
+  colors like `#ff4433` to `#f43`. `color.ts` handles every hex form, with tests, after
+  a bug where the short form parsed as dark navy.
 - **Staying fast**: the internal resolution steps down if frames run slow, the device pixel
   ratio is capped at 1.5, and the loop stops when the tab is hidden or a window is open.
 - **Fallbacks**: without WebGL2 the canvas stays hidden and the flat page color shows.

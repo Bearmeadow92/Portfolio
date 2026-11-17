@@ -9,10 +9,10 @@
 import { createStore, useStore } from "./store";
 
 export const SCENES = [
-  { id: "breach", name: "Breach", blurb: "A live attack map. Your cursor is the sensor. Click to fire a probe." },
-  { id: "glyph", name: "Glyph", blurb: "A 3D sculpture rendered entirely in text, lit from your cursor." },
-  { id: "drivetrain", name: "Drivetrain", blurb: "Gears and a piston in linework. Sweep across the screen to turn the crank." },
-  { id: "chrome", name: "Chrome", blurb: "Liquid metal, raymarched live. Your cursor orbits the camera." },
+  { id: "breach", name: "Breach", blurb: "A quiet network. Every few seconds an attack lands, spreads, and gets contained." },
+  { id: "glyph", name: "Glyph", blurb: "A spinning donut drawn in text characters, in the spirit of donut.c." },
+  { id: "drivetrain", name: "Drivetrain", blurb: "A V-twin engine in blueprint. Move fast or scroll to rev it." },
+  { id: "chrome", name: "Chrome", blurb: "A machined chrome bolt and nut. Sweep across to screw the nut along the thread." },
 ] as const;
 
 export type SceneId = (typeof SCENES)[number]["id"];
