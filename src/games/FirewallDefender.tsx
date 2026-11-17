@@ -486,7 +486,7 @@ export default function FirewallDefender() {
     const p = paletteRef.current;
     if (!ctx || !p) return;
     const w = world.current;
-    const mono = (size: number, bold = true) => `${bold ? "bold " : ""}${size}px 'DM Mono', monospace`;
+    const mono = (size: number, bold = true) => `${bold ? "bold " : ""}${size}px 'Geist Mono', monospace`;
 
     ctx.save();
     if (w.shake > 0) ctx.translate((Math.random() - 0.5) * w.shake, (Math.random() - 0.5) * w.shake);

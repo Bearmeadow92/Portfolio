@@ -3,8 +3,9 @@
 
   Art direction
   -------------
-  A quiet interface over living art. The page itself is almost empty: large type,
-  hairlines, generous space, square corners, no drop shadows and no gradients.
+  A quiet interface over living art. The page itself is almost empty: precise type,
+  1px hairlines, generous space, square corners, no drop shadows and no gradients.
+  One typeface family (Geist and Geist Mono) keeps everything on a single voice.
   All of the color and movement comes from the generative backdrop (src/art), and
   each backdrop "scene" brings its own small palette that re-tints the whole site.
 
@@ -116,9 +117,9 @@
   --color-good: var(--good);
   --color-bad: var(--bad);
   --color-warn: var(--warn);
-  --font-sans: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "DM Mono", ui-monospace, "SFMono-Regular", monospace;
-  --font-display: "Syne", "Instrument Sans", sans-serif;
+  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SFMono-Regular", monospace;
+  --font-display: "Geist", ui-sans-serif, system-ui, sans-serif;
 }
 
 /* Square corners everywhere: every `rounded-*` utility except `rounded-full` resolves to zero. */
@@ -143,7 +144,10 @@
     font-family: var(--font-sans);
     font-size: 1.0625rem;
     line-height: 1.55;
+    letter-spacing: -0.006em;
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "ss01", "cv11";
     overflow-x: hidden;
     transition: color 0.5s ease;
   }
@@ -166,19 +170,21 @@
 
 /* 4. Components. */
 @layer components {
-  /* Headline type: wide, heavy, tightly set. */
+  /* Headline type: tight, precise, and medium weight. Size does the shouting, not weight. */
   .display {
     font-family: var(--font-display);
-    font-weight: 800;
-    letter-spacing: -0.045em;
-    line-height: 0.92;
+    font-weight: 560;
+    letter-spacing: -0.052em;
+    line-height: 0.94;
+    text-wrap: balance;
   }
 
   /* Small uppercase monospace label. */
   .label {
     font-family: var(--font-mono);
-    font-size: 0.75rem;
-    letter-spacing: 0.1em;
+    font-size: 0.6875rem;
+    letter-spacing: 0.08em;
+    font-variant-numeric: tabular-nums;
     text-transform: uppercase;
   }
 
@@ -195,12 +201,13 @@
     gap: 0.6rem;
     overflow: hidden;
     isolation: isolate;
-    padding: 0.95rem 1.5rem;
+    height: 3rem;
+    padding: 0 1.4rem;
     border: 1px solid var(--text);
     font-family: var(--font-mono);
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
     font-weight: 500;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--text);
     cursor: pointer;

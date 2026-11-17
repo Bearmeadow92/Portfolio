@@ -36,6 +36,10 @@ Four switchable scenes, each a small fragment shader running on the GPU. Each sc
 
 ### Interface details
 
+- **One typeface family**: Geist and Geist Mono, set tight. Size does the shouting, not weight.
+- **A clear zone**: the art steps back behind the hero copy, so the type stays crisp without an overlay.
+- **Live telemetry**: the hero reads out pointer position and the real frame rate, written straight from the WebGL loop.
+
 - **Liquid, magnetic buttons**: the hover color grows from the exact point your pointer enters, and the button leans toward the cursor.
 - **Index rows** instead of cards: each project is one line that inverts on hover.
 - **A cursor ring** that trails the mouse and grows over anything clickable.

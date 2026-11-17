@@ -49,17 +49,17 @@ function Row({ item, number, action }: { item: CatalogItem; number: number; acti
           pulse(0.35);
         }}
         onFocus={warm}
-        className="row group grid w-full grid-cols-[2.5rem_1fr_auto] items-baseline gap-x-4 gap-y-1 px-2 py-6 text-left sm:px-4 md:grid-cols-[3rem_minmax(0,1.5fr)_minmax(0,1fr)_7rem]"
+        className="row group grid w-full grid-cols-[2.5rem_1fr_auto] items-baseline gap-x-4 gap-y-1 px-2 py-5 text-left sm:px-4 md:grid-cols-[3rem_minmax(0,1.3fr)_minmax(0,1fr)_6rem]"
       >
         <span className="label opacity-60">{String(number).padStart(2, "0")}</span>
         <span>
-          <span className="display block text-[clamp(1.6rem,3.3vw,2.75rem)]">{item.title}</span>
-          <span className="label mt-2 flex flex-wrap gap-x-3 gap-y-1 opacity-70">
+          <span className="display block text-[clamp(1.5rem,2.6vw,2.25rem)] !leading-none">{item.title}</span>
+          <span className="label mt-2.5 flex flex-wrap gap-x-3 gap-y-1 opacity-70">
             <span>{item.tag}</span>
             {best && <span>Best {best}</span>}
           </span>
         </span>
-        <span className="col-span-2 col-start-2 max-w-md text-base opacity-80 md:col-span-1 md:col-start-3">{item.blurb}</span>
+        <span className="col-span-2 col-start-2 max-w-md text-[0.9375rem] leading-snug opacity-75 md:col-span-1 md:col-start-3">{item.blurb}</span>
         <span className="label col-start-3 row-start-1 flex items-center justify-end gap-2 md:col-start-4">
           {action}
           <span className="inline-block transition-transform duration-300 group-hover:translate-x-1.5" aria-hidden>→</span>

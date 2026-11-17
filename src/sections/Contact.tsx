@@ -99,20 +99,20 @@ export function Contact() {
           <ul className="border-b border-border">
             <li>
               <a href={profile.links.github} target="_blank" rel="noreferrer" className="row flex items-baseline justify-between gap-4 px-2 py-5">
-                <span className="font-display text-2xl font-bold">GitHub</span>
+                <span className="font-display text-2xl font-medium tracking-tight">GitHub</span>
                 <span className="label opacity-70">@{profile.github} ↗</span>
               </a>
             </li>
             <li>
               <a href={profile.links.linkedin} target="_blank" rel="noreferrer" className="row flex items-baseline justify-between gap-4 px-2 py-5">
-                <span className="font-display text-2xl font-bold">LinkedIn</span>
+                <span className="font-display text-2xl font-medium tracking-tight">LinkedIn</span>
                 <span className="label opacity-70">Connect ↗</span>
               </a>
             </li>
             {profile.links.email && (
               <li>
                 <a href={`mailto:${profile.links.email}`} className="row flex items-baseline justify-between gap-4 px-2 py-5">
-                  <span className="font-display text-2xl font-bold">Email</span>
+                  <span className="font-display text-2xl font-medium tracking-tight">Email</span>
                   <span className="label opacity-70">{profile.links.email}</span>
                 </a>
               </li>

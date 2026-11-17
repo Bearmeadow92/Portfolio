@@ -58,7 +58,7 @@ export function Navbar() {
   return (
     <header className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${scrolled || menuOpen ? "border-b border-border bg-bg" : "border-b border-transparent"}`}>
       <nav className="mx-auto flex max-w-[1400px] items-center gap-6 px-5 py-4 sm:px-10" aria-label="Main">
-        <a href="#home" className="font-display text-xl font-extrabold tracking-tight" aria-label={`${profile.name}, back to top`}>
+        <a href="#home" className="font-display text-xl font-medium tracking-tight tracking-tight" aria-label={`${profile.name}, back to top`}>
           {profile.name}
           <span className="text-accent">.</span>
         </a>
@@ -91,7 +91,7 @@ export function Navbar() {
         <ul id="mobile-menu" className="border-t border-border px-5 py-3 lg:hidden">
           {LINKS.map((l, i) => (
             <li key={l.id}>
-              <a href={`#${l.id}`} onClick={() => setMenuOpen(false)} className={`flex items-baseline gap-4 py-2.5 font-display text-2xl font-bold ${active === l.id ? "text-accent" : ""}`}>
+              <a href={`#${l.id}`} onClick={() => setMenuOpen(false)} className={`flex items-baseline gap-4 py-2.5 font-display text-2xl font-medium tracking-tight ${active === l.id ? "text-accent" : ""}`}>
                 <span className="label w-6 opacity-60">0{i + 1}</span>
                 {l.label}
               </a>

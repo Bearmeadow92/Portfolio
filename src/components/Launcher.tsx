@@ -52,7 +52,7 @@ export function Launcher() {
           <header className="sticky top-0 z-10 flex items-center gap-5 border-b border-border bg-bg px-5 py-4">
             <span className="label opacity-60">{String(catalog.indexOf(item) + 1).padStart(2, "0")}</span>
             <div className="min-w-0 flex-1">
-              <h2 id="launcher-title" className="truncate font-display text-xl font-extrabold tracking-tight">
+              <h2 id="launcher-title" className="truncate font-display text-xl font-medium tracking-tight tracking-tight">
                 {item.title}
               </h2>
             </div>

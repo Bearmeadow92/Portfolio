@@ -311,7 +311,7 @@ export function updatePopups(list: Popup[], dt: number) {
 }
 
 export function drawPopups(ctx: CanvasRenderingContext2D, list: Popup[]) {
-  ctx.font = "bold 14px 'DM Mono', monospace";
+  ctx.font = "bold 14px 'Geist Mono', monospace";
   ctx.textAlign = "center";
   for (const p of list) {
     ctx.globalAlpha = Math.min(p.life * 2, 1);

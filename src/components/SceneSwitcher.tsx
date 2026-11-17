@@ -32,7 +32,7 @@ export function SceneButton() {
 export function SceneTabs() {
   const scene = useScene();
   return (
-    <div role="tablist" aria-label="Background scene" className="flex flex-wrap gap-x-6 gap-y-2">
+    <div role="tablist" aria-label="Background scene" className="flex flex-wrap gap-x-5 gap-y-1">
       {SCENES.map((s, i) => (
         <button
           key={s.id}
@@ -40,9 +40,10 @@ export function SceneTabs() {
           aria-selected={s.id === scene}
           title={s.blurb}
           onClick={() => applyScene(s.id)}
-          className={`label flex items-baseline gap-2 border-t py-2 transition-colors ${s.id === scene ? "border-current" : "border-transparent opacity-55 hover:opacity-100"}`}
+          className={`label flex items-baseline gap-2 py-1 transition-colors ${s.id === scene ? "text-text" : "text-muted hover:text-text"}`}
         >
-          <span className="text-[0.625rem]">0{i + 1}</span>
+          <span className={s.id === scene ? "text-accent" : ""}>{s.id === scene ? "■" : "□"}</span>
+          <span className="sr-only">Scene {i + 1}:</span>
           {s.name}
         </button>
       ))}
